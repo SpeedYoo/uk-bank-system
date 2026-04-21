@@ -23,7 +23,7 @@ Aplikacja bankowa symulująca brytyjski bank komercyjny, integrująca się z zew
 | Frontend                 | **React** + Vite + TailwindCSS      | Szybki dev, popularny stack                                                      |
 | Backend                  | **Django** + Django REST Framework  | Wbudowany ORM, admin panel, szybkie API                                          |
 | Baza danych              | **PostgreSQL**                      | Transakcje ACID, mocne wsparcie dla typów numeric                                |
-| Komunikacja z izbami     | REST API (HTTP/JSON)                | Zgodnie z wytycznymi — „API maksymalnie zbliżone do rzeczywistych odpowiedników" |
+| Komunikacja z modułami     | REST API (HTTP/JSON)                | Zgodnie z wytycznymi — „API maksymalnie zbliżone do rzeczywistych odpowiedników" |
 | Autoryzacja              | JWT (djangorestframework-simplejwt) | Stateless, prosta integracja z React                                             |
 | Konteneryzacja           | **Docker + docker-compose**         | Wymóg projektu                                                                   |
 
