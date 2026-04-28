@@ -1,0 +1,5 @@
+
+# Zignorowane œrodowisko i sekrety
+.env
+venv/
+__pycache__/
