@@ -123,7 +123,7 @@ STATIC_URL = 'static/'
 # ==========================================
 
 # 1. Custom User Model (musi być ustawione przed migracjami bazy)
-AUTH_USER_MODEL = 'customers.User'
+AUTH_USER_MODEL = 'accounts.User'
 
 # 2. CORS (Zezwolenie frontendowi na komunikację z API)
 CORS_ALLOWED_ORIGINS = [
@@ -141,3 +141,5 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
 }
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
