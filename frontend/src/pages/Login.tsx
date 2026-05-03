@@ -66,21 +66,6 @@ const Login = () => {
                     <p className="text-slate-400 text-base md:text-lg leading-relaxed mb-8 md:mb-12 text-left max-w-md">
                         Move money across borders with bank-grade security and real-time settlement.
                     </p>
-
-                    <div className="grid grid-cols-3 gap-4 sm:gap-8 border-t border-white/5 pt-8 md:pt-10 w-full">
-                        <div className="flex flex-col">
-                            <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-emerald-500">£13.6B</span>
-                            <span className="text-[9px] sm:text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-1">Processed</span>
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-emerald-500">2.4M</span>
-                            <span className="text-[9px] sm:text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-1">Customers</span>
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-emerald-500">99.9%</span>
-                            <span className="text-[9px] sm:text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-1">Uptime</span>
-                        </div>
-                    </div>
                 </div>
             </div>
 
