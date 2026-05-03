@@ -39,8 +39,11 @@ services:
       - /app/node_modules
     environment:
       - VITE_API_URL=${VITE_API_URL}
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
     depends_on:
       - backend
+  
 
   pgadmin:
     image: dpage/pgadmin4
