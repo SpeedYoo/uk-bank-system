@@ -31,12 +31,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    # Zewnętrzne biblioteki
+    
     'rest_framework',
     'corsheaders',
     'rest_framework_simplejwt',
     
-    # Aplikacje bankowe (DDD)
+    'users',
     'customers',
     'accounts',
     'transactions',
@@ -44,7 +44,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'corsheaders.middleware.CorsMiddleware', # DODANE: Obsługa CORS dla Reacta
+    'corsheaders.middleware.CorsMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -104,41 +104,36 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
+
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Europe/London' # ZMIENIONE: Czas brytyjski (ważne dla CHAPS)
+TIME_ZONE = 'Europe/London' 
 
 USE_I18N = True
 
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
+
 STATIC_URL = 'static/'
 
 
-# ==========================================
-# KONFIGURACJA UK BANK SYSTEM
-# ==========================================
 
-# 1. Custom User Model (musi być ustawione przed migracjami bazy)
-AUTH_USER_MODEL = 'accounts.User'
+AUTH_USER_MODEL = 'users.User'
 
-# 2. CORS (Zezwolenie frontendowi na komunikację z API)
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
-# 3. Konfiguracja Django REST Framework (Autoryzacja JWT)
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ),
 }
 
