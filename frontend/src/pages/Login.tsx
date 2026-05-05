@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Eye, EyeOff } from 'lucide-react';
 import api from '../api/axios';
 import logoImg from '../assets/logo.png';
@@ -20,7 +20,7 @@ const Login = () => {
 
         try {
             const response = await api.post('/auth/login/', {
-                username: email,
+                email: email,
                 password: password,
             });
 
@@ -28,8 +28,12 @@ const Login = () => {
             localStorage.setItem('refresh_token', response.data.refresh);
             navigate('/dashboard');
 
-        } catch (err) {
-            setError('Nieprawidłowy email lub hasło. Spróbuj ponownie.');
+        } catch (err: any) {
+            if (err.response && err.response.data && err.response.data.detail) {
+                setError(err.response.data.detail);
+            } else {
+                setError('Invalid email or password. Please try again.');
+            }
         } finally {
             setLoading(false);
         }
@@ -81,12 +85,12 @@ const Login = () => {
                         </div>
                     )}
 
-                    <form onSubmit={handleLogin} className="space-y-6">
+                    <form onSubmit={handleLogin} className="space-y-6" noValidate>
                         <div className="space-y-2.5">
                             <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest">Email Address</label>
                             <div className="relative group">
                                 <input
-                                    type="text"
+                                    type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
@@ -131,7 +135,10 @@ const Login = () => {
                         </button>
 
                         <p className="text-center text-slate-500 text-sm mt-8">
-                            Don't have an account? <a href="#" className="text-blue-500 font-semibold hover:underline">Create account</a>
+                            Don't have an account?{' '}
+                            <Link to="/register" className="text-blue-500 font-semibold hover:underline transition-colors">
+                                Create account
+                            </Link>
                         </p>
                     </form>
                 </div>
