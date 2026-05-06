@@ -1,8 +1,11 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from customers.models import Customer
 
 User = get_user_model()
+
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class CustomLoginSerializer(TokenObtainPairSerializer):
     
@@ -14,6 +17,14 @@ class CustomLoginSerializer(TokenObtainPairSerializer):
         data = super().validate(attrs)
 
         data['email'] = self.user.email
+        
+        
+        customer_profile = Customer.objects.filter(user=self.user).first()
+        
+        if customer_profile and customer_profile.kyc_verified:
+            data['is_setup_complete'] = True
+        else:
+            data['is_setup_complete'] = False
         
         return data
 

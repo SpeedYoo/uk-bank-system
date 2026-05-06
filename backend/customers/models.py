@@ -14,6 +14,9 @@ class Customer(models.Model):
     date_of_birth = models.DateField()
     phone = models.CharField(max_length=20)
     country = models.CharField(max_length=50)
+    city = models.CharField(max_length=100)
+    postcode = models.CharField(max_length=20)
+    street = models.CharField(max_length=255)
 
     customer_type = models.CharField(max_length=20)
 
