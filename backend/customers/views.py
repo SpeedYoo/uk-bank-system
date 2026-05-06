@@ -25,4 +25,25 @@ class ProfileStatusView(APIView):
     def get(self, request):
         customer = Customer.objects.filter(user=request.user).first()
         is_complete = customer.kyc_verified if customer else False
+        
         return Response({'is_setup_complete': is_complete})
+
+class CurrentCustomerView(generics.RetrieveAPIView):
+    serializer_class = CustomerSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        
+        return Customer.objects.get(user=self.request.user)
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist() 
+            return Response({"message": "Successfully logged out"}, status=205)
+        except Exception as e:
+            return Response({"error": "Invalid token"}, status=400)
