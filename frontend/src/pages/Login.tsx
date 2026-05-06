@@ -24,9 +24,16 @@ const Login = () => {
                 password: password,
             });
 
-            localStorage.setItem('access_token', response.data.access);
-            localStorage.setItem('refresh_token', response.data.refresh);
-            navigate('/dashboard');
+            const { access, refresh, is_setup_complete } = response.data;
+
+            localStorage.setItem('access_token', access);
+            localStorage.setItem('refresh_token', refresh);
+
+            if (is_setup_complete) {
+                navigate('/dashboard', { replace: true });
+            } else {
+                navigate('/setup', { replace: true });
+            }
 
         } catch (err: any) {
             if (err.response && err.response.data && err.response.data.detail) {
