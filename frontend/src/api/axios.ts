@@ -6,11 +6,11 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-  
     const token = localStorage.getItem('access_token');
     
+
     const authPaths = ['/auth/login/', '/auth/register/'];
-    const isAuthPath = authPaths.some(path => config.url?.includes(path));
+    const isAuthPath = authPaths.some(path => config.url?.endsWith(path));
 
     if (token && !isAuthPath) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -23,17 +23,19 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const requestUrl = error.config?.url || '';
     
     if (error.response && error.response.status === 401) {
-      if (requestUrl.includes('/auth/login/')) {
-        return Promise.reject(error);
-      }
+      const isLoginRequest = error.config?.url?.includes('/auth/login/');
 
-      
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      window.location.href = '/login';
+      if (!isLoginRequest) {
+
+        localStorage.clear(); 
+        
+        
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+      }
     }
 
     return Promise.reject(error);

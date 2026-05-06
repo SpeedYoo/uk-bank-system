@@ -7,6 +7,7 @@ import {
 import api from '../api/axios';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
+import AddMoneyModal from '../components/AddMoneyModal';
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -19,6 +20,33 @@ const Dashboard = () => {
     const [totalBalance, setTotalBalance] = useState(0);
     const [accountCount, setAccountCount] = useState(0);
     const [accounts, setAccounts] = useState<any[]>([]);
+    const [isAddMoneyOpen, setIsAddMoneyOpen] = useState(false);
+
+    const fetchData = async () => {
+        try {
+            const statusRes = await api.get('/setup/status/');
+            if (!statusRes.data.is_setup_complete) {
+                navigate('/setup', { replace: true });
+                return;
+            }
+
+            const userRes = await api.get('/me/');
+            setFirstName(userRes.data.firstName);
+            setLastName(userRes.data.lastName);
+
+            const accountsRes = await api.get('/accounts/');
+            setAccounts(accountsRes.data);
+            setAccountCount(accountsRes.data.length);
+
+            const sum = accountsRes.data.reduce((acc: number, curr: any) => acc + parseFloat(curr.balance), 0);
+            setTotalBalance(sum);
+
+            setLoading(false);
+        } catch (err) {
+            console.error("Błąd:", err);
+            navigate('/login', { replace: true });
+        }
+    };
 
     useEffect(() => {
         const currentHour = new Date().getHours();
@@ -26,36 +54,9 @@ const Dashboard = () => {
         else if (currentHour < 18) setGreeting('Good afternoon');
         else setGreeting('Good evening');
 
-        const fetchData = async () => {
-            try {
-                const statusRes = await api.get('/setup/status/');
-                if (!statusRes.data.is_setup_complete) {
-                    navigate('/setup', { replace: true });
-                    return;
-                }
-
-                const userRes = await api.get('/me/');
-                setFirstName(userRes.data.firstName);
-                setLastName(userRes.data.lastName);
-
-                const accountsRes = await api.get('/accounts/');
-                setAccounts(accountsRes.data);
-                setAccountCount(accountsRes.data.length);
-
-                const sum = accountsRes.data.reduce((acc: number, curr: any) => acc + parseFloat(curr.balance), 0);
-                setTotalBalance(sum);
-
-                setLoading(false);
-            } catch (err) {
-                console.error("Błąd:", err);
-                navigate('/login', { replace: true });
-            }
-        };
-
         fetchData();
     }, [navigate]);
 
- 
     const formattedTotalBalance = new Intl.NumberFormat('en-GB', {
         style: 'currency',
         currency: 'GBP'
@@ -98,11 +99,9 @@ const Dashboard = () => {
                 <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-10">
                     <div className="max-w-6xl mx-auto space-y-6">
 
-                        {/* --- TOTAL BALANCE SECTION --- */}
                         <section className="bg-[#161B22] border border-gray-800 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-lg">
                             <div>
                                 <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Total Balance</p>
-                                {/* POPRAWIONE: Używamy zmiennej zamiast statycznego tekstu */}
                                 <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">{formattedTotalBalance}</h1>
                                 <p className="text-gray-500 text-sm mt-3">
                                     Across {accountCount} account{accountCount !== 1 ? 's' : ''} · Updated just now
@@ -112,21 +111,24 @@ const Dashboard = () => {
                                 <button className="flex-1 md:flex-none bg-[#00FF85] hover:bg-[#00e074] text-black px-6 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors">
                                     <Send size={18} /> Send money
                                 </button>
+                                <button
+                                    onClick={() => setIsAddMoneyOpen(true)}
+                                    className="flex-1 md:flex-none border border-gray-700 hover:bg-gray-800 text-white px-6 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors"
+                                >
+                                    <Plus size={18} /> Add money
+                                </button>
                             </div>
                         </section>
 
-                        {/* --- ACCOUNTS CARDS SECTION --- */}
                         <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {accounts.map((account, index) => {
                                 const accType = (account.account_type || "").trim().toUpperCase();
                                 const isCurrent = accType === 'CURRENT' || index === 0;
 
-                                // Funkcja formatująca IBAN wewnątrz mapowania
                                 const formattedIban = (account.iban || "").replace(/\s+/g, '').replace(/(.{4})/g, '$1 ').trim();
 
                                 return (
                                     <div key={account.id} className="bg-[#161B22] border border-gray-800 rounded-3xl p-6 cursor-pointer hover:border-gray-600 transition-all group relative overflow-hidden">
-                                        {/* Dekoracyjny blask w tle dla koloru */}
                                         <div className={`absolute -top-10 -right-10 w-24 h-24 blur-3xl opacity-10 ${isCurrent ? 'bg-emerald-500' : 'bg-purple-500'}`}></div>
 
                                         <div className="flex justify-between items-center mb-8">
@@ -138,7 +140,6 @@ const Dashboard = () => {
 
                                         <div className="space-y-1">
                                             <div className="flex items-center gap-2">
-                                                {/* KOLOROWA NAZWA KONTA */}
                                                 <p className={`text-xs font-bold uppercase tracking-widest ${isCurrent ? 'text-emerald-400' : 'text-purple-400'}`}>
                                                     {isCurrent ? 'Current Account' : 'Junior Account'}
                                                 </p>
@@ -157,7 +158,6 @@ const Dashboard = () => {
                                             </h2>
                                         </div>
 
-                                        {/* CZYSTY IBAN BEZ PROSTOKĄTA */}
                                         <div className="mt-6 pt-4 border-t border-gray-800/50">
                                             <p className="text-gray-500 text-[11px] font-mono tracking-[0.15em] uppercase opacity-70 group-hover:opacity-100 transition-opacity">
                                                 {formattedIban}
@@ -174,8 +174,6 @@ const Dashboard = () => {
                             </button>
                         </section>
 
-                        {/* --- TRANSACTIONS LIST --- */}
-                        {/* Zostawiamy jak było, bo jeszcze nie mamy transakcji w bazie */}
                         <section className="bg-[#161B22] border border-gray-800 rounded-3xl p-6">
                             <div className="flex justify-between items-center mb-6 border-b border-gray-800 pb-6">
                                 <div className="flex bg-[#0B0E14] p-1 rounded-xl">
@@ -196,6 +194,12 @@ const Dashboard = () => {
                     </div>
                 </main>
             </div>
+            <AddMoneyModal 
+                isOpen={isAddMoneyOpen} 
+                onClose={() => setIsAddMoneyOpen(false)} 
+                accounts={accounts}
+                onSuccess={() => fetchData()} 
+            />
         </div>
     );
 };
