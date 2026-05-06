@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .serializers import CustomerSerializer
 from rest_framework.views import APIView
+from django.shortcuts import render, get_object_or_404
 
 class SetupProfileView(generics.UpdateAPIView):
     serializer_class = CustomerSerializer
@@ -34,7 +35,7 @@ class CurrentCustomerView(generics.RetrieveAPIView):
 
     def get_object(self):
         
-        return Customer.objects.get(user=self.request.user)
+        return get_object_or_404(Customer, user=self.request.user)
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
