@@ -6,6 +6,7 @@ from .serializers import CustomerSerializer
 from rest_framework.views import APIView
 from django.shortcuts import render, get_object_or_404
 
+
 class SetupProfileView(generics.UpdateAPIView):
     serializer_class = CustomerSerializer
     permission_classes = [permissions.IsAuthenticated] 

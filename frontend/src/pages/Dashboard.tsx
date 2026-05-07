@@ -8,6 +8,7 @@ import api from '../api/axios';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import AddMoneyModal from '../components/AddMoneyModal';
+import AddJuniorModal from '../components/AddJuniorModal';
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -21,6 +22,7 @@ const Dashboard = () => {
     const [accountCount, setAccountCount] = useState(0);
     const [accounts, setAccounts] = useState<any[]>([]);
     const [isAddMoneyOpen, setIsAddMoneyOpen] = useState(false);
+    const [isAddJuniorOpen, setIsAddJuniorOpen] = useState(false);
 
     const fetchData = async () => {
         try {
@@ -143,13 +145,14 @@ const Dashboard = () => {
                                                 <p className={`text-xs font-bold uppercase tracking-widest ${isCurrent ? 'text-emerald-400' : 'text-purple-400'}`}>
                                                     {isCurrent ? 'Current Account' : 'Junior Account'}
                                                 </p>
-                                                {!isCurrent && (
-                                                    <span className="bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-md text-[10px] font-black uppercase">
-                                                        Junior
-                                                    </span>
-                                                )}
-                                            </div>
 
+                                                <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${isCurrent
+                                                        ? 'bg-emerald-500/20 text-emerald-400'
+                                                        : 'bg-purple-500/20 text-purple-300'
+                                                    }`}>
+                                                    {account.owner_first_name || (isCurrent ? 'MAIN' : 'JUNIOR')}
+                                                </span>
+                                            </div>
                                             <h2 className="text-3xl font-black text-white tracking-tight">
                                                 {new Intl.NumberFormat('en-GB', {
                                                     style: 'currency',
@@ -166,7 +169,10 @@ const Dashboard = () => {
                                     </div>
                                 );
                             })}
-                            <button className="bg-transparent border-2 border-dashed border-gray-700 hover:border-[#00FF85] hover:bg-[#00FF85]/5 rounded-3xl p-6 flex flex-col items-center justify-center text-gray-500 hover:text-[#00FF85] transition-all min-h-[180px] group">
+                            <button
+                                onClick={() => setIsAddJuniorOpen(true)}
+                                className="bg-transparent border-2 border-dashed border-gray-700 hover:border-[#00FF85] hover:bg-[#00FF85]/5 rounded-3xl p-6 flex flex-col items-center justify-center text-gray-500 hover:text-[#00FF85] transition-all min-h-[180px] group"
+                            >
                                 <div className="w-12 h-12 bg-gray-800 group-hover:bg-[#00FF85]/20 rounded-full flex items-center justify-center mb-3 transition-colors">
                                     <Plus size={24} className="text-gray-400 group-hover:text-[#00FF85] transition-colors" />
                                 </div>
@@ -194,14 +200,22 @@ const Dashboard = () => {
                     </div>
                 </main>
             </div>
-            <AddMoneyModal 
-                isOpen={isAddMoneyOpen} 
-                onClose={() => setIsAddMoneyOpen(false)} 
+            <AddMoneyModal
+                isOpen={isAddMoneyOpen}
+                onClose={() => setIsAddMoneyOpen(false)}
                 accounts={accounts}
-                onSuccess={() => fetchData()} 
+                onSuccess={() => fetchData()}
             />
+
+            <AddJuniorModal
+                isOpen={isAddJuniorOpen}
+                onClose={() => setIsAddJuniorOpen(false)}
+                onSuccess={() => fetchData()}
+            />
+
         </div>
     );
+
 };
 
 export default Dashboard;
