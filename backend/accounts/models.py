@@ -30,13 +30,26 @@ class Account(models.Model):
         default=Decimal("0.00")
     )
 
-    account_type = models.CharField(max_length=50)
-    status = models.CharField(max_length=20, default="ACTIVE")
+    class AccountType(models.TextChoices):
+        STANDARD = "STANDARD", "Standard"
+        JUNIOR = "JUNIOR", "Junior"
+    
 
-    overdraft_limit = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        default=Decimal("0.00")
+    class AccountStatus(models.TextChoices):
+        ACTIVE = "ACTIVE", "Active"
+        BLOCKED = "BLOCKED", "Blocked"
+        CLOSED = "CLOSED", "Closed"
+
+    account_type = models.CharField(
+        max_length=50,
+        choices=AccountType.choices,
+        default=AccountType.STANDARD
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=AccountStatus.choices,
+        default=AccountStatus.ACTIVE
     )
 
     created_at = models.DateTimeField(auto_now_add=True)

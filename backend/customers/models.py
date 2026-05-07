@@ -18,13 +18,13 @@ class Customer(models.Model):
     postcode = models.CharField(max_length=20)
     street = models.CharField(max_length=255)
 
-    customer_type = models.CharField(max_length=20)
 
     parent_customer = models.ForeignKey(
         'self',
         null=True,
         blank=True,
-        on_delete=models.SET_NULL
+        on_delete=models.SET_NULL,
+        related_name='children'
     )
 
     kyc_verified = models.BooleanField(default=False)
