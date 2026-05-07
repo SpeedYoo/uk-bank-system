@@ -145,13 +145,14 @@ const Dashboard = () => {
                                                 <p className={`text-xs font-bold uppercase tracking-widest ${isCurrent ? 'text-emerald-400' : 'text-purple-400'}`}>
                                                     {isCurrent ? 'Current Account' : 'Junior Account'}
                                                 </p>
-                                                {!isCurrent && (
-                                                    <span className="bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-md text-[10px] font-black uppercase">
-                                                        Junior
-                                                    </span>
-                                                )}
-                                            </div>
 
+                                                <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${isCurrent
+                                                        ? 'bg-emerald-500/20 text-emerald-400'
+                                                        : 'bg-purple-500/20 text-purple-300'
+                                                    }`}>
+                                                    {account.owner_first_name || (isCurrent ? 'MAIN' : 'JUNIOR')}
+                                                </span>
+                                            </div>
                                             <h2 className="text-3xl font-black text-white tracking-tight">
                                                 {new Intl.NumberFormat('en-GB', {
                                                     style: 'currency',

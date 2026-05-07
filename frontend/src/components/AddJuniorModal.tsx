@@ -22,14 +22,44 @@ const AddJuniorModal: React.FC<AddJuniorModalProps> = ({ isOpen, onClose, onSucc
         e.preventDefault();
         setError('');
         
-        if (!firstName || !lastName || !dob) {
+        // 1. Sprawdzenie czy pola nie są puste
+        if (!firstName.trim() || !lastName.trim() || !dob) {
             setError("All fields are required.");
+            return;
+        }
+
+        // 2. Walidacja Imienia i Nazwiska (min. 2 znaki, tylko litery)
+        const nameRegex = /^[A-Za-zżźćńółęąśŻŹĆŃÓŁĘĄŚ\s-]+$/;
+        if (firstName.trim().length < 2 || lastName.trim().length < 2) {
+            setError("First and last name must be at least 2 characters long.");
+            return;
+        }
+        if (!nameRegex.test(firstName) || !nameRegex.test(lastName)) {
+            setError("Names can only contain letters, spaces, or hyphens.");
+            return;
+        }
+
+        // 3. Walidacja Wieku (7-13 lat)
+        const birthDate = new Date(dob);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+
+        if (age < 7 || age > 13) {
+            setError("Junior account is strictly for children between 7 and 13 years old.");
             return;
         }
 
         setLoading(true);
         try {
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            await api.post('/accounts/junior/', { 
+                first_name: firstName.trim(), 
+                last_name: lastName.trim(), 
+                date_of_birth: dob 
+            });
             
             setIsSuccess(true);
             setTimeout(() => {
@@ -42,7 +72,12 @@ const AddJuniorModal: React.FC<AddJuniorModalProps> = ({ isOpen, onClose, onSucc
             }, 2000);
         } catch (err: any) {
             console.error("Failed to create junior account", err);
-            setError("Failed to create account. Please try again.");
+            // Wyświetlenie błędu z backendu (jeśli jakiś cwaniak oszuka frontend)
+            if (err.response && err.response.data && err.response.data.error) {
+                setError(err.response.data.error);
+            } else {
+                setError("Failed to create account. Please try again.");
+            }
         } finally {
             setLoading(false);
         }
@@ -56,7 +91,7 @@ const AddJuniorModal: React.FC<AddJuniorModalProps> = ({ isOpen, onClose, onSucc
                     <div className="absolute inset-0 bg-[#161B22] z-50 flex flex-col items-center justify-center animate-in fade-in duration-300">
                         <CheckCircle2 size={64} className="text-[#00FF85] mb-4 animate-bounce" />
                         <h3 className="text-xl font-bold text-white text-center">
-                            Junior Account<br/>Created Successfully!
+                            Junior Account<br />Created Successfully!
                         </h3>
                     </div>
                 )}
@@ -157,8 +192,8 @@ const AddJuniorModal: React.FC<AddJuniorModalProps> = ({ isOpen, onClose, onSucc
                         disabled={loading}
                         className={`
                             w-full py-5 rounded-2xl font-black text-base transition-all duration-300 flex items-center justify-center gap-2 active:scale-[0.98]
-                            ${loading 
-                                ? 'bg-gray-800 text-gray-500 cursor-not-allowed shadow-none' 
+                            ${loading
+                                ? 'bg-gray-800 text-gray-500 cursor-not-allowed shadow-none'
                                 : 'bg-[#00FF85] text-black shadow-[0_0_20px_rgba(0,255,133,0.2)] hover:shadow-[0_0_30px_rgba(0,255,133,0.4)] hover:bg-[#00e074]'}
                         `}
                     >
