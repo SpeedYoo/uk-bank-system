@@ -2,6 +2,7 @@ import React from 'react';
 import { LayoutDashboard, Users, CreditCard, PieChart, Wallet, Settings, X, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import { Link, useLocation } from 'react-router-dom';
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -19,6 +20,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   onLogout
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // NOWA LOGIKA WYLOGOWANIA
   const handleLogoutClick = async () => {
@@ -34,7 +36,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       // Czyścimy wszystko i wyrzucamy do logowania niezależnie od sukcesu API
       localStorage.clear();
       navigate('/login', { replace: true });
-      
+
       // Jeśli przekazałeś jakąś dodatkową funkcję w propsach, też ją wywołujemy
       if (onLogout) onLogout();
     }
@@ -77,11 +79,31 @@ const Sidebar: React.FC<SidebarProps> = ({
             <LayoutDashboard size={20} />
             <span className="font-medium">Dashboard</span>
           </div>
-          {['Accounts', 'Payments', 'Analytics', 'Cards', 'Settings'].map((item) => (
-            <div key={item} className="flex items-center gap-4 px-4 py-3 text-gray-500 cursor-not-allowed">
-              <span className="font-medium">{item}</span>
-            </div>
-          ))}
+          {['Accounts', 'Payments', 'Analytics', 'Cards', 'Settings'].map((item) => {
+            // Jeśli to zakładka Accounts, robimy z niej klikalny link
+            if (item === 'Accounts') {
+              const isActive = location.pathname.startsWith('/accounts');
+              return (
+                <Link
+                  key={item}
+                  to="/accounts"
+                  className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${isActive
+                      ? 'bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20'
+                      : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
+                    }`}
+                >
+                  <span className="font-medium">{item}</span>
+                </Link>
+              );
+            }
+
+            // Reszta zakładek zostaje zablokowana
+            return (
+              <div key={item} className="flex items-center gap-4 px-4 py-3 text-gray-600 cursor-not-allowed opacity-50">
+                <span className="font-medium">{item}</span>
+              </div>
+            );
+          })}
         </nav>
 
         <div className="mt-auto pt-4 border-t border-gray-800/50">

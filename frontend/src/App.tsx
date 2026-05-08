@@ -4,7 +4,7 @@ import Register from './pages/Register';
 import SetupPage from './pages/SetupPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import Dashboard from './pages/Dashboard';
-
+import Accounts from './pages/Accounts';
 // Importujemy naszego strażnika
 import PublicRoute from './components/PublicRoute'; 
 
@@ -47,6 +47,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/setup" element={<SetupPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/accounts" element={<Accounts />} />
         </Route>
         
         {/* CATCH ALL - Redirect unknown paths to dashboard (który i tak wyrzuci na login, jeśli ktoś nie ma tokena) */}
