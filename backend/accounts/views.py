@@ -12,6 +12,7 @@ from customers.models import Customer
 from django.db.models import Q
 from datetime import datetime, date
 import re
+from limits.models import AccountLimits
 
 class MyAccountsListView(generics.ListAPIView):
     serializer_class = AccountSerializer
@@ -106,3 +107,34 @@ class AccountDepositView(APIView):
             
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class UpdateAccountLimitsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request):
+        account_id = request.data.get('account_id')
+        channel = request.data.get('channel') # Pobieramy kanał płatności wysłany z frontu
+        
+        if not account_id or not channel:
+            return Response({"error": "account_id and channel are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_customer = request.user.customer
+        account = get_object_or_404(Account, id=account_id)
+
+        # Zabezpieczenie przed edycją cudzego konta
+        if account.customer != user_customer and account.customer.parent_customer != user_customer:
+            return Response({"error": "Unauthorized"}, status=status.HTTP_403_FORBIDDEN)
+
+        # Szukamy konkretnego limitu dla danego kanału
+        try:
+            limit = account.limits.get(channel=channel)
+        except AccountLimits.DoesNotExist:
+            return Response({"error": f"Limit for channel {channel} not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Zapisujemy nowe wartości
+        if 'per_transaction_limit' in request.data:
+            limit.per_transaction_limit = request.data['per_transaction_limit']
+        if 'daily_limit' in request.data:
+            limit.daily_limit = request.data['daily_limit']
+
+        limit.save()
+        return Response({"message": "Limits updated successfully"}, status=status.HTTP_200_OK)

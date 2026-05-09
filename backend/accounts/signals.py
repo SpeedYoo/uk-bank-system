@@ -30,7 +30,10 @@ def create_bank_account(sender, instance, created, **kwargs):
 
         limits_data = AccountLimits.defaults_for(acc_type)
 
-        AccountLimits.objects.create(
-            account=account,
-            **limits_data
-        )
+        for channel, limits in limits_data.items():
+            AccountLimits.objects.create(
+                account=account,
+                channel=channel,
+                per_transaction_limit=limits["per_transaction_limit"],
+                daily_limit=limits["daily_limit"]
+            )
