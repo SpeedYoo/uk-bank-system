@@ -1,6 +1,15 @@
 import React from 'react';
-import { LayoutDashboard, Users, CreditCard, PieChart, Wallet, Settings, X, LogOut } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { 
+  LayoutDashboard, 
+  Wallet, 
+  ArrowRightLeft, 
+  PieChart, 
+  CreditCard, 
+  Settings, 
+  X, 
+  LogOut 
+} from 'lucide-react';
+import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import api from '../api/axios';
 
 interface SidebarProps {
@@ -8,7 +17,7 @@ interface SidebarProps {
   onClose?: () => void;
   firstName?: string;
   lastName?: string;
-  onLogout?: () => void; // Zachowujemy, ale Sidebar sam obsłuży logikę
+  onLogout?: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -19,28 +28,35 @@ const Sidebar: React.FC<SidebarProps> = ({
   onLogout
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // NOWA LOGIKA WYLOGOWANIA
+  // Sprawdzamy, czy jesteśmy na stronie setupu
+  const isSetupPage = location.pathname.startsWith('/setup');
+
   const handleLogoutClick = async () => {
     try {
       const refreshToken = localStorage.getItem('refresh_token');
       if (refreshToken) {
-        // Informujemy backend o unieważnieniu tokena
         await api.post('/auth/logout/', { refresh: refreshToken });
       }
     } catch (error) {
       console.error("Logout failed on backend:", error);
     } finally {
-      // Czyścimy wszystko i wyrzucamy do logowania niezależnie od sukcesu API
       localStorage.clear();
       navigate('/login', { replace: true });
-      
-      // Jeśli przekazałeś jakąś dodatkową funkcję w propsach, też ją wywołujemy
       if (onLogout) onLogout();
     }
   };
 
-  const initials = `${firstName.charAt(0) || ''}${lastName.charAt(0) || ''}`.toUpperCase() || 'JD';
+  
+  const menuItems = [
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+    { name: 'Accounts', path: '/accounts', icon: Wallet },
+    { name: 'Payments', path: '/payments', icon: ArrowRightLeft },
+    { name: 'Analytics', path: '/analytics', icon: PieChart },
+    { name: 'Cards', path: '/cards', icon: CreditCard },
+    { name: 'Settings', path: '/settings', icon: Settings },
+  ];
 
   return (
     <>
@@ -73,23 +89,49 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         <nav className="flex-1 space-y-2">
-          <div className="flex items-center gap-4 px-4 py-3 rounded-xl bg-[#161B22] text-[#00FF85]">
-            <LayoutDashboard size={20} />
-            <span className="font-medium">Dashboard</span>
-          </div>
-          {['Accounts', 'Payments', 'Analytics', 'Cards', 'Settings'].map((item) => (
-            <div key={item} className="flex items-center gap-4 px-4 py-3 text-gray-500 cursor-not-allowed">
-              <span className="font-medium">{item}</span>
-            </div>
-          ))}
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+
+            
+            if (isSetupPage) {
+              return (
+                <div key={item.name} className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 cursor-not-allowed opacity-50 border border-transparent">
+                  <Icon size={20} />
+                  <span className="font-medium">{item.name}</span>
+                </div>
+              );
+            }
+
+            
+            return (
+              <NavLink
+                key={item.name}
+                to={item.path}
+                className={({ isActive }) => `flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${
+                  isActive
+                    ? 'bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.05)]'
+                    : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
+                }`}
+              >
+                <Icon size={20} />
+                <span className="font-medium">{item.name}</span>
+              </NavLink>
+            );
+          })}
         </nav>
 
+        {/* Sekcja wylogowania - blokujemy ją podczas setupu (opcjonalne, ale logiczne) */}
         <div className="mt-auto pt-4 border-t border-gray-800/50">
           <button
-            onClick={handleLogoutClick} // PODPIĘTA NOWA LOGIKA
-            className="flex items-center justify-center gap-3 w-full p-4 bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 hover:border-red-500/30 hover:text-red-300 rounded-2xl transition-all group cursor-pointer"
+            onClick={handleLogoutClick}
+            disabled={isSetupPage}
+            className={`flex items-center justify-center gap-3 w-full p-4 rounded-2xl transition-all group ${
+              isSetupPage 
+                ? 'bg-gray-900 border border-gray-800 text-gray-600 cursor-not-allowed opacity-50' 
+                : 'bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 hover:border-red-500/30 hover:text-red-300 cursor-pointer'
+            }`}
           >
-            <LogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
+            <LogOut size={20} className={!isSetupPage ? "group-hover:-translate-x-1 transition-transform" : ""} />
             <span className="font-bold text-sm tracking-wide">Log out</span>
           </button>
         </div>
