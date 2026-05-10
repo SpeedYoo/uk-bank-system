@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import Account
 from decimal import Decimal
 from limits.models import AccountLimits
+from cards.serializers import CardSerializer
 
 class AccountSerializer(serializers.ModelSerializer):
 
@@ -9,9 +10,11 @@ class AccountSerializer(serializers.ModelSerializer):
 
     limits = serializers.SerializerMethodField()
 
+    cards = CardSerializer(many=True, read_only=True)
+
     class Meta:
         model = Account
-        fields = ['id', 'account_number', 'sort_code', 'iban', 'currency', 'balance', 'account_type',  'available_balance', 'status', 'owner_first_name', 'limits']
+        fields = ['id', 'account_number', 'sort_code', 'iban', 'currency', 'balance', 'account_type',  'available_balance', 'status', 'owner_first_name', 'limits','cards']
 
     def get_limits(self, obj):
         return {

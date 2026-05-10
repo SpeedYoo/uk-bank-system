@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import Accounts from './pages/Accounts';
 // Importujemy naszego strażnika
 import PublicRoute from './components/PublicRoute'; 
+import Layout from './components/Layout';
 
 function App() {
   return (
@@ -43,11 +44,13 @@ function App() {
           } 
         />
 
-        {/* PROTECTED ROUTES - Only accessible if logged in */}
+        {/* PROTECTED ROUTES - Dostępne tylko po zalogowaniu */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/setup" element={<SetupPage />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/accounts" element={<Accounts />} />
+          <Route element={<Layout />}>
+            <Route path="/setup" element={<SetupPage />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/accounts" element={<Accounts />} />
+          </Route>
         </Route>
         
         {/* CATCH ALL - Redirect unknown paths to dashboard (który i tak wyrzuci na login, jeśli ktoś nie ma tokena) */}
