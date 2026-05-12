@@ -7,6 +7,7 @@ from cards.serializers import CardSerializer
 class AccountSerializer(serializers.ModelSerializer):
 
     owner_first_name = serializers.CharField(source='customer.first_name', read_only=True)
+    owner_last_name = serializers.CharField(source='customer.last_name', read_only=True)
 
     limits = serializers.SerializerMethodField()
 
@@ -14,7 +15,7 @@ class AccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Account
-        fields = ['id', 'account_number', 'sort_code', 'iban', 'currency', 'balance', 'account_type',  'available_balance', 'status', 'owner_first_name', 'limits','cards']
+        fields = ['id', 'account_number', 'sort_code', 'iban', 'currency', 'balance', 'account_type',  'available_balance', 'status', 'owner_first_name','owner_last_name', 'limits','cards']
 
     def get_limits(self, obj):
         return {

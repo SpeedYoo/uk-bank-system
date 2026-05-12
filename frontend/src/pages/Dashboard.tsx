@@ -6,8 +6,9 @@ import {
 import api from '../api/axios';
 import AddMoneyModal from '../components/AddMoneyModal';
 import AddJuniorModal from '../components/AddJuniorModal';
+import TransferModal from '../components/TransferModal';
 
-// Oczekujemy danych z kontekstu Layoutu
+
 interface ContextType {
     firstName: string;
     lastName: string;
@@ -17,7 +18,7 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const context = useOutletContext<ContextType>();
 
-    // Zabezpieczenie przed błędem, gdyby kontekst nie był w pełni załadowany
+    
     const firstName = context?.firstName || '';
 
     const [loading, setLoading] = useState(true);
@@ -26,22 +27,17 @@ const Dashboard = () => {
     const [accounts, setAccounts] = useState<any[]>([]);
     const [isAddMoneyOpen, setIsAddMoneyOpen] = useState(false);
     const [isAddJuniorOpen, setIsAddJuniorOpen] = useState(false);
+    const [isTransferOpen, setIsTransferOpen] = useState(false);
 
     const fetchData = async () => {
         try {
-            // Najpierw upewnijmy się, że setup jest kompletny
-            const statusRes = await api.get('/setup/status/');
-            if (!statusRes.data.is_setup_complete) {
-                navigate('/setup', { replace: true });
-                return;
-            }
-
-            // Pobieramy tylko konta, usera pobrał już Layout
+            
+            
             const accountsRes = await api.get('/accounts/');
             setAccounts(accountsRes.data);
             setAccountCount(accountsRes.data.length);
 
-            // Obliczamy łączny balans ze wszystkich kont
+            
             const sum = accountsRes.data.reduce((acc: number, curr: any) => acc + parseFloat(curr.balance), 0);
             setTotalBalance(sum);
 
@@ -76,7 +72,7 @@ const Dashboard = () => {
     };
 
     return (
-        
+
         <>
             <div className="p-4 sm:p-6 md:p-10 w-full animate-fadeIn">
                 <div className="max-w-6xl mx-auto space-y-6">
@@ -91,7 +87,10 @@ const Dashboard = () => {
                             </p>
                         </div>
                         <div className="flex w-full md:w-auto gap-4">
-                            <button className="flex-1 md:flex-none bg-[#00FF85] hover:bg-[#00e074] text-black px-6 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors">
+                            <button
+                                onClick={() => setIsTransferOpen(true)}
+                                className="flex-1 md:flex-none bg-[#00FF85] hover:bg-[#00e074] text-black px-6 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors"
+                            >
                                 <Send size={18} /> Send money
                             </button>
                             <button
@@ -201,6 +200,12 @@ const Dashboard = () => {
             <AddJuniorModal
                 isOpen={isAddJuniorOpen}
                 onClose={() => setIsAddJuniorOpen(false)}
+                onSuccess={() => fetchData()}
+            />
+            <TransferModal
+                isOpen={isTransferOpen}
+                onClose={() => setIsTransferOpen(false)}
+                accounts={accounts}
                 onSuccess={() => fetchData()}
             />
 

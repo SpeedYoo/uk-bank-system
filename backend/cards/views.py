@@ -6,6 +6,9 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from accounts.models import Account
 from .models import Card
+from decimal import Decimal
+from django.db import transaction
+from transactions.models import Transaction
 
 class CreateCardView(APIView):
     permission_classes = [IsAuthenticated]
@@ -60,7 +63,7 @@ class CardManageView(APIView):
         card_id = request.data.get('card_id')
         card = get_object_or_404(Card, id=card_id)
         
-        # Uprawnienia
+        
         user_customer = request.user.customer
         if card.account.customer != user_customer and card.account.customer.parent_customer != user_customer:
             return Response(status=status.HTTP_403_FORBIDDEN)
@@ -82,3 +85,49 @@ class CardManageView(APIView):
 
         card.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class TopUpPrepaidView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        card_id = request.data.get('card_id')
+        try:
+            amount = Decimal(str(request.data.get('amount', '0')))
+        except Exception:
+            return Response({"error": "Invalid amount"}, status=400)
+
+        if amount <= 0:
+            return Response({"error": "Amount must be greater than zero"}, status=400)
+
+        card = get_object_or_404(Card, id=card_id)
+        account = card.account
+
+        user_customer = request.user.customer
+        if account.customer != user_customer and account.customer.parent_customer != user_customer:
+            return Response({"error": "Unauthorized"}, status=403)
+
+        if card.card_type != 'PREPAID':
+            return Response({"error": "Only prepaid cards can be topped up"}, status=400)
+
+        if account.balance < amount:
+            return Response({"error": "Insufficient funds on the main account"}, status=400)
+
+        with transaction.atomic():
+            
+            account.balance -= amount
+            card.prepaid_balance += amount
+            account.save()
+            card.save()
+
+            Transaction.objects.create(
+                user=request.user, 
+                account=account, 
+                amount=-amount, 
+                title=f"Top-up Prepaid Card {card.masked_number}"
+            )
+
+        return Response({
+            "message": "Card topped up successfully", 
+            "new_prepaid_balance": card.prepaid_balance,
+            "new_account_balance": account.balance
+        }, status=200)

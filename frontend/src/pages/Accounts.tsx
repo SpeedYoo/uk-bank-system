@@ -4,6 +4,7 @@ import api from '../api/axios';
 import ConfirmActionModal from '../components/ConfirmActionModal';
 import CardDetailsModal from '../components/CardDetailsModal';
 import CardManager from '../components/CardManager';
+import TopUpModal from '../components/TopUpModal';
 
 interface ContextType {
     firstName: string;
@@ -33,6 +34,7 @@ const Accounts = () => {
     const [blikTxLimit, setBlikTxLimit] = useState('');
     const [blikDailyLimit, setBlikDailyLimit] = useState('');
     const [isSavingLimits, setIsSavingLimits] = useState(false);
+    const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false); 
 
     
     const refreshData = async () => {
@@ -212,7 +214,7 @@ const Accounts = () => {
                                         <div className="flex justify-between items-center gap-4 border-b border-gray-800/50 pb-2">
                                             <span className="text-gray-500 font-bold text-[9px] sm:text-[10px] uppercase tracking-widest whitespace-nowrap">Account Holder</span>
                                             <span className="font-bold text-gray-200 text-xs sm:text-sm text-right truncate">
-                                                {selectedAccount.account_type === 'JUNIOR' ? `${selectedAccount.owner_first_name} ${lastName}` : `${firstName} ${lastName}`}
+                                                {selectedAccount.account_type === 'JUNIOR' ? `${selectedAccount.owner_first_name} ${selectedAccount.owner_last_name}` : `${firstName} ${lastName}`}
                                             </span>
                                         </div>
                                         <div className="flex justify-between items-center gap-4 border-b border-gray-800/50 pb-2">
@@ -220,7 +222,7 @@ const Accounts = () => {
                                             <span className="font-mono text-gray-300 text-xs sm:text-sm text-right">{selectedAccount.sort_code?.match(/.{1,2}/g)?.join('-') || 'N/A'}</span>
                                         </div>
                                         <div className="flex justify-between items-center gap-4 border-b border-gray-800/50 pb-2">
-                                            <span className="text-gray-500 font-bold text-[9px] sm:text-[10px] uppercase tracking-widest whitespace-nowrap">Account No.</span>
+                                            <span className="text-gray-500 font-bold text-[9px] sm:text-[10px] uppercase tracking-widest whitespace-nowrap">Account Number</span>
                                             <span className="font-mono text-gray-300 text-xs sm:text-sm text-right">{selectedAccount.account_number || 'N/A'}</span>
                                         </div>
                                         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-1 sm:gap-4 pt-0.5">
@@ -255,6 +257,7 @@ const Accounts = () => {
                                 setBlikDailyLimit={setBlikDailyLimit}
                                 onSaveLimits={handleSaveLimits}
                                 isSavingLimits={isSavingLimits}
+                                onTopUpClick={() => setIsTopUpModalOpen(true)}
                             />
                         </div>
                     ) : (
@@ -265,8 +268,19 @@ const Accounts = () => {
 
             <ConfirmActionModal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} onConfirm={handleDeleteCard} loading={isDeleting} title="Delete Card" message="Are you sure you want to permanently delete this card?" />
             <CardDetailsModal isOpen={isDetailsModalOpen} onClose={() => setIsDetailsModalOpen(false)} card={selectedAccount?.cards?.find((c: any) => c.id === activeCardId)} />
+
+            <TopUpModal 
+                isOpen={isTopUpModalOpen} 
+                onClose={() => setIsTopUpModalOpen(false)} 
+                cardId={activeCardId}
+                onSuccess={() => {
+                    setIsTopUpModalOpen(false);
+                    refreshData(); 
+                }} 
+            />
         </>
     );
 };
-
+    
+        
 export default Accounts;

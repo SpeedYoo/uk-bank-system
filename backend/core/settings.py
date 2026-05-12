@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'transactions',
     'limits',
     'cards',
+    'transfers',
 ]
 
 MIDDLEWARE = [
