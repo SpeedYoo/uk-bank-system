@@ -1,7 +1,5 @@
 import React, { useState, useEffect, type ChangeEvent, type FormEvent, } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import Header from '../components/Header';
 import api from '../api/axios';
 
 interface SetupFormData {
@@ -22,22 +20,7 @@ interface FormErrors {
 
 const SetupPage: React.FC = () => {
 
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const checkRedirection = async () => {
-      try {
-        const response = await api.get('/setup/status/');
-        if (response.data.is_setup_complete) {
-          navigate('/dashboard', { replace: true });
-        }
-      } catch (err) {
-        console.error("Auth error in SetupPage");
-      }
-    };
-    checkRedirection();
-  }, [navigate]);
-
+  
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
   const [isVerifying, setIsVerifying] = useState(false);
@@ -164,10 +147,9 @@ const SetupPage: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-[#0B0E14] text-white font-sans overflow-hidden relative">
-      <Sidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+
 
       <div className="flex-1 flex flex-col overflow-hidden w-full">
-        <Header title="Account Setup" onMenuClick={() => setIsMobileMenuOpen(true)} />
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 flex items-center justify-center">
           <div className="max-w-2xl w-full bg-[#161B22] border border-gray-800 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 shadow-2xl mx-auto">
@@ -191,12 +173,12 @@ const SetupPage: React.FC = () => {
                 currentStep === 2
                   ? handleSubmit
                   : (e) => {
-                      e.preventDefault();
+                    e.preventDefault();
 
-                      if (validateStep(1)) {
-                        setCurrentStep(2);
-                      }
+                    if (validateStep(1)) {
+                      setCurrentStep(2);
                     }
+                  }
               }
             >
 
@@ -234,10 +216,15 @@ const SetupPage: React.FC = () => {
 
                   <div className="flex flex-col">
                     <input
-                      type="date"
+                      type={formData.dob ? "date" : "text"}
                       name="dob"
+                      placeholder="Date of Birth (DD-MM-YYYY)"
                       value={formData.dob}
                       onChange={handleChange}
+                      onFocus={(e) => (e.target.type = "date")}
+                      onBlur={(e) => {
+                        if (!formData.dob) e.target.type = "text";
+                      }}
                       className={`w-full bg-[#0B0E14] border ${errors.dob ? 'border-red-500' : 'border-gray-700'} p-3 sm:p-4 rounded-xl focus:border-[#00FF85] outline-none transition-all text-sm sm:text-base [&::-webkit-calendar-picker-indicator]:hidden`}
                     />
                     <ErrorMsg field="dob" />

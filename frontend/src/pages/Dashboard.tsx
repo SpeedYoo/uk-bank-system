@@ -8,7 +8,7 @@ import AddMoneyModal from '../components/AddMoneyModal';
 import AddJuniorModal from '../components/AddJuniorModal';
 import TransferModal from '../components/TransferModal';
 
-// Oczekujemy danych z kontekstu Layoutu
+
 interface ContextType {
     firstName: string;
     lastName: string;
@@ -18,7 +18,7 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const context = useOutletContext<ContextType>();
 
-    // Zabezpieczenie przed błędem, gdyby kontekst nie był w pełni załadowany
+    
     const firstName = context?.firstName || '';
 
     const [loading, setLoading] = useState(true);
@@ -31,19 +31,13 @@ const Dashboard = () => {
 
     const fetchData = async () => {
         try {
-            // Najpierw upewnijmy się, że setup jest kompletny
-            const statusRes = await api.get('/setup/status/');
-            if (!statusRes.data.is_setup_complete) {
-                navigate('/setup', { replace: true });
-                return;
-            }
-
-            // Pobieramy tylko konta, usera pobrał już Layout
+            
+            
             const accountsRes = await api.get('/accounts/');
             setAccounts(accountsRes.data);
             setAccountCount(accountsRes.data.length);
 
-            // Obliczamy łączny balans ze wszystkich kont
+            
             const sum = accountsRes.data.reduce((acc: number, curr: any) => acc + parseFloat(curr.balance), 0);
             setTotalBalance(sum);
 

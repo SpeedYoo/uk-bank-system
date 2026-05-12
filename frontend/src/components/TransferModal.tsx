@@ -13,18 +13,19 @@ const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, accounts
     const [activeTab, setActiveTab] = useState<'EXTERNAL' | 'OWN'>('EXTERNAL');
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [error, setError] = useState('');
 
     const [fromAccountId, setFromAccountId] = useState('');
     const [amount, setAmount] = useState('');
-    
-    // Pola "External Transfer"
+
+
     const [recipientName, setRecipientName] = useState('');
     const [recipientAccount, setRecipientAccount] = useState('');
     const [swiftCode, setSwiftCode] = useState('');
     const [title, setTitle] = useState('');
-    const [routingMethod, setRoutingMethod] = useState('FPS'); 
+    const [routingMethod, setRoutingMethod] = useState('FPS');
 
-    // Pola "Own Transfer"
+
     const [toAccountId, setToAccountId] = useState('');
 
     const formatBalance = (val: string) => {
@@ -34,7 +35,7 @@ const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, accounts
         });
     };
 
-    const availableFromAccounts = activeTab === 'EXTERNAL' 
+    const availableFromAccounts = activeTab === 'EXTERNAL'
         ? accounts.filter(acc => acc.account_type === 'CURRENT')
         : accounts;
 
@@ -52,13 +53,14 @@ const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, accounts
     useEffect(() => {
         if (isOpen) {
             setSuccess(false);
+            setError('');
             setAmount('');
             setRecipientName('');
             setRecipientAccount('');
             setSwiftCode('');
             setTitle('');
             setRoutingMethod('FPS');
-            
+
             if (availableFromAccounts.length > 0) {
                 setFromAccountId(availableFromAccounts[0].id);
             } else {
@@ -71,27 +73,65 @@ const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, accounts
 
     const handleTransfer = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError('');
+
         if (!fromAccountId) return;
+
+        const parsedAmount = parseFloat(amount);
+
+
+        if (isNaN(parsedAmount) || parsedAmount <= 0) {
+            setError("Amount must be greater than zero.");
+            return;
+        }
+
+
+        const sourceAccount = availableFromAccounts.find(acc => acc.id === fromAccountId);
+        if (sourceAccount && parsedAmount > parseFloat(sourceAccount.balance)) {
+            setError("Insufficient funds. You don't have enough money.");
+            return;
+        }
+
+
+        if (activeTab === 'EXTERNAL') {
+
+            if (recipientName.trim().length < 2) {
+                setError("Recipient name must be at least 2 characters long.");
+                return;
+            }
+
+
+            const ibanRegex = /^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/;
+            if (!ibanRegex.test(cleanIban)) {
+                setError("Invalid IBAN format. Check country code and check digits.");
+                return;
+            }
+        }
+
+        if (activeTab === 'OWN' && !toAccountId) {
+            setError("Please select a target account.");
+            return;
+        }
 
         setLoading(true);
         try {
-            const endpoint = activeTab === 'OWN' ? '/transfers/own/' : '/transfers/national/';
-            
-            const payload = activeTab === 'OWN' 
-                ? { 
-                    from_account: fromAccountId, 
-                    to_account: toAccountId, 
-                    amount: parseFloat(amount) 
-                  }
-                : { 
-                    from_account: fromAccountId, 
+            const endpoint = activeTab === 'OWN' ? 'transfers/own/' : 'transfers/national/';
+
+            const payload = activeTab === 'OWN'
+                ? {
+                    from_account: fromAccountId,
+                    to_account: toAccountId,
+                    amount: parsedAmount
+                }
+                : {
+                    from_account: fromAccountId,
                     recipient_name: recipientName,
                     recipient_account: cleanIban,
                     routing_method: routingMethod,
                     swift_bic: isInternational ? swiftCode.trim() : null,
-                    amount: parseFloat(amount), 
+                    amount: parsedAmount,
                     title
-                  };
+                };
 
             await api.post(endpoint, payload);
             setSuccess(true);
@@ -99,9 +139,13 @@ const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, accounts
                 onSuccess();
                 onClose();
             }, 2000);
-        } catch (error) {
-            console.error("Transfer failed:", error);
-            alert("Transfer failed. Please check your balance and details.");
+        } catch (err: any) {
+            console.error("Transfer failed:", err);
+            if (err.response && err.response.data && err.response.data.error) {
+                setError(err.response.data.error);
+            } else {
+                setError("Transfer failed. Please check your details and try again.");
+            }
         } finally {
             setLoading(false);
         }
@@ -110,9 +154,9 @@ const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, accounts
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-            
+
             <div className="relative bg-[#161B22] border border-gray-800 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-fadeIn flex flex-col max-h-[90vh]">
-                
+
                 {/* HEADER */}
                 <div className="p-6 border-b border-gray-800 flex justify-between items-center bg-[#1c222a] shrink-0">
                     <h2 className="text-xl font-bold text-white flex items-center gap-3">
@@ -125,19 +169,26 @@ const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, accounts
                 </div>
 
                 <div className="flex p-1.5 bg-[#0B0E14] mx-6 mt-6 rounded-2xl border border-gray-800 shrink-0">
-                    <button 
-                        onClick={() => setActiveTab('EXTERNAL')}
+                    <button
+                        onClick={() => { setActiveTab('EXTERNAL'); setError(''); }}
                         className={`flex-1 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'EXTERNAL' ? 'bg-[#161B22] text-[#00FF85] shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
                     >
                         External Transfer
                     </button>
-                    <button 
-                        onClick={() => setActiveTab('OWN')}
+                    <button
+                        onClick={() => { setActiveTab('OWN'); setError(''); }}
                         className={`flex-1 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'OWN' ? 'bg-[#161B22] text-[#00FF85] shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
                     >
                         Own Transfer
                     </button>
                 </div>
+
+                {/* TUTAJ WSTAWIAMY NASZ CUSTOMOWY BŁĄD */}
+                {error && (
+                    <div className="mx-6 mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center animate-in fade-in duration-300">
+                        {error}
+                    </div>
+                )}
 
                 {success ? (
                     <div className="p-12 flex flex-col items-center justify-center text-center space-y-4 flex-1">
@@ -148,12 +199,12 @@ const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, accounts
                         <p className="text-gray-500 font-medium">Your request is being processed.</p>
                     </div>
                 ) : (
-                    <form onSubmit={handleTransfer} className="p-6 space-y-4 overflow-y-auto no-scrollbar flex-1">
-                        
+                    <form onSubmit={handleTransfer} className="p-6 space-y-4 overflow-y-auto no-scrollbar flex-1" noValidate>
+
                         {/* FROM ACCOUNT */}
                         <div>
                             <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block px-1">From Account</label>
-                            <select 
+                            <select
                                 value={fromAccountId}
                                 onChange={(e) => setFromAccountId(e.target.value)}
                                 className="w-full bg-[#0B0E14] border border-gray-700 rounded-xl px-4 py-3 text-white font-bold focus:border-[#00FF85] outline-none appearance-none"
@@ -162,7 +213,7 @@ const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, accounts
                                 {availableFromAccounts.length > 0 ? (
                                     availableFromAccounts.map(acc => (
                                         <option key={acc.id} value={acc.id}>
-                                            {acc.account_type} · £{formatBalance(acc.balance)}
+                                            {acc.account_type} ({acc.owner_first_name || 'Main'}) · £{formatBalance(acc.balance)}
                                         </option>
                                     ))
                                 ) : (
@@ -175,29 +226,29 @@ const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, accounts
                             <div className="space-y-4 animate-fadeIn">
                                 <div>
                                     <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block px-1">Recipient Name</label>
-                                    <input 
+                                    <input
                                         type="text"
-                                        placeholder="Full Name / Company"
+                                        placeholder="Enter the recipient's name"
                                         value={recipientName}
                                         onChange={(e) => setRecipientName(e.target.value)}
                                         className="w-full bg-[#0B0E14] border border-gray-700 rounded-xl px-4 py-3 text-white focus:border-[#00FF85] outline-none transition-colors"
                                         required
                                     />
                                 </div>
-                                
+
                                 {/* IBAN INPUT */}
                                 <div>
                                     <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block px-1 flex justify-between">
                                         <span>Account Number (IBAN)</span>
                                         {cleanIban.length >= 2 && (
-                                            isInternational 
-                                            ? <span className="text-blue-400 font-bold flex items-center gap-1"><Globe size={12}/> International</span>
-                                            : <span className="text-emerald-400 font-bold flex items-center gap-1"><Zap size={12}/> UK Domestic</span>
+                                            isInternational
+                                                ? <span className="text-blue-400 font-bold flex items-center gap-1"><Globe size={12} /> International</span>
+                                                : <span className="text-emerald-400 font-bold flex items-center gap-1"><Zap size={12} /> UK Domestic</span>
                                         )}
                                     </label>
-                                    <input 
+                                    <input
                                         type="text"
-                                        placeholder="GB89 LYOB 0000..."
+                                        placeholder="Enter the recipient's account number"
                                         value={recipientAccount}
                                         onChange={(e) => setRecipientAccount(e.target.value)}
                                         className={`w-full bg-[#0B0E14] border rounded-xl px-4 py-3 text-white font-mono outline-none transition-colors ${isInternational ? 'border-blue-500/50 focus:border-blue-500' : 'border-gray-700 focus:border-[#00FF85]'}`}
@@ -208,7 +259,7 @@ const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, accounts
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block px-1">Transfer Network</label>
-                                        <select 
+                                        <select
                                             value={routingMethod}
                                             onChange={(e) => setRoutingMethod(e.target.value)}
                                             disabled={isInternational}
@@ -225,13 +276,13 @@ const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, accounts
                                             )}
                                         </select>
                                     </div>
-                                    
+
                                     {isInternational && (
                                         <div className="animate-fadeIn">
                                             <label className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1.5 block px-1">
                                                 BIC / SWIFT Code
                                             </label>
-                                            <input 
+                                            <input
                                                 type="text"
                                                 placeholder="Bank Code"
                                                 value={swiftCode}
@@ -246,7 +297,7 @@ const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, accounts
                                         <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block px-1">Amount</label>
                                         <div className="relative">
                                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">£</span>
-                                            <input 
+                                            <input
                                                 type="number"
                                                 step="0.01"
                                                 value={amount}
@@ -258,10 +309,10 @@ const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, accounts
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div>
                                     <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block px-1">Title</label>
-                                    <input 
+                                    <input
                                         type="text"
                                         placeholder="Transfer title"
                                         value={title}
@@ -276,7 +327,7 @@ const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, accounts
                             <div className="space-y-4 animate-fadeIn">
                                 <div>
                                     <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block px-1">To Account</label>
-                                    <select 
+                                    <select
                                         value={toAccountId}
                                         onChange={(e) => setToAccountId(e.target.value)}
                                         className="w-full bg-[#0B0E14] border border-gray-700 rounded-xl px-4 py-3 text-white font-bold focus:border-[#00FF85] outline-none appearance-none"
@@ -285,7 +336,7 @@ const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, accounts
                                         <option value="">Select target account</option>
                                         {accounts.filter(acc => acc.id !== fromAccountId).map(acc => (
                                             <option key={acc.id} value={acc.id}>
-                                                {acc.account_type} ({acc.owner_first_name || 'Main'})
+                                                {acc.account_type} ({acc.owner_first_name || 'Main'}) · £{formatBalance(acc.balance)}
                                             </option>
                                         ))}
                                     </select>
@@ -294,7 +345,7 @@ const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, accounts
                                     <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block px-1">Amount</label>
                                     <div className="relative">
                                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">£</span>
-                                        <input 
+                                        <input
                                             type="number"
                                             step="0.01"
                                             value={amount}
@@ -308,7 +359,7 @@ const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, accounts
                             </div>
                         )}
 
-                        <button 
+                        <button
                             type="submit"
                             disabled={loading || !amount || !fromAccountId}
                             className="w-full bg-[#00FF85] hover:bg-[#00e074] disabled:opacity-50 disabled:hover:bg-[#00FF85] text-black font-black py-4 rounded-2xl transition-all shadow-[0_8px_20px_rgba(0,255,133,0.15)] mt-4 uppercase tracking-widest text-xs shrink-0"
