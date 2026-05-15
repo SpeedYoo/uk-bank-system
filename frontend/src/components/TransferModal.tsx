@@ -7,9 +7,10 @@ interface TransferModalProps {
     onClose: () => void;
     accounts: any[];
     onSuccess: () => void;
+    prefilled?: { recipientName: string; recipientAccount: string; routingMethod: string } | null;
 }
 
-const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, accounts, onSuccess }) => {
+const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, accounts, onSuccess, prefilled }) => {
     const [activeTab, setActiveTab] = useState<'EXTERNAL' | 'OWN'>('EXTERNAL');
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -55,11 +56,19 @@ const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, accounts
             setSuccess(false);
             setError('');
             setAmount('');
-            setRecipientName('');
-            setRecipientAccount('');
             setSwiftCode('');
             setTitle('');
-            setRoutingMethod('FPS');
+
+            if (prefilled) {
+                setActiveTab('EXTERNAL');
+                setRecipientName(prefilled.recipientName);
+                setRecipientAccount(prefilled.recipientAccount);
+                setRoutingMethod(prefilled.routingMethod);
+            } else {
+                setRecipientName('');
+                setRecipientAccount('');
+                setRoutingMethod('FPS');
+            }
 
             if (availableFromAccounts.length > 0) {
                 setFromAccountId(availableFromAccounts[0].id);

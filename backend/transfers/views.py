@@ -3,12 +3,92 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from rest_framework.pagination import PageNumberPagination
 
 from accounts.models import Account
-from .models import Transfer
+from .models import Transfer, SavedRecipient
 from transactions.models import Transaction
 from django.db.models import Q
 from decimal import Decimal
+
+
+class TransferPagination(PageNumberPagination):
+    page_size = 20
+    page_size_query_param = 'page_size'
+
+
+class TransferListView(APIView):
+    """GET /api/transfers/ — all outgoing transfers for the authenticated user."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        qs = Transfer.objects.filter(user=request.user).order_by('-created_at')
+        paginator = TransferPagination()
+        page = paginator.paginate_queryset(qs, request)
+        data = [
+            {
+                'id': t.id,
+                'recipient_name': t.recipient_name,
+                'recipient_account': t.recipient_account,
+                'from_account_number': t.from_account.account_number,
+                'amount': str(t.amount),
+                'title': t.title,
+                'routing_method': t.routing_method,
+                'status': t.status,
+                'created_at': t.created_at.isoformat(),
+            }
+            for t in page
+        ]
+        return paginator.get_paginated_response(data)
+
+
+class SavedRecipientView(APIView):
+    """GET/POST /api/recipients/"""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        recipients = SavedRecipient.objects.filter(user=request.user)
+        data = [
+            {
+                'id': r.id,
+                'name': r.name,
+                'account': r.account,
+                'routing_method': r.routing_method,
+            }
+            for r in recipients
+        ]
+        return Response(data)
+
+    def post(self, request):
+        name = request.data.get('name', '').strip()
+        account = request.data.get('account', '').strip().replace(' ', '').upper()
+        routing_method = request.data.get('routing_method', 'FPS')
+
+        if not name or not account:
+            return Response({'error': 'name and account are required'}, status=400)
+
+        # Avoid exact duplicates for the same user
+        if SavedRecipient.objects.filter(user=request.user, account=account).exists():
+            return Response({'error': 'This recipient is already saved'}, status=400)
+
+        r = SavedRecipient.objects.create(
+            user=request.user, name=name, account=account, routing_method=routing_method
+        )
+        return Response({'id': r.id, 'name': r.name, 'account': r.account, 'routing_method': r.routing_method}, status=201)
+
+
+class SavedRecipientDeleteView(APIView):
+    """DELETE /api/recipients/{id}/"""
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, pk):
+        try:
+            r = SavedRecipient.objects.get(pk=pk, user=request.user)
+            r.delete()
+            return Response(status=204)
+        except SavedRecipient.DoesNotExist:
+            return Response({'error': 'Not found'}, status=404)
+
 
 class OwnTransferView(APIView):
     permission_classes = [IsAuthenticated]
@@ -18,7 +98,7 @@ class OwnTransferView(APIView):
         try:
             from_id = data.get('from_account')
             to_id = data.get('to_account')
-            
+
             try:
                 amount = Decimal(str(data.get('amount', '0')))
             except Exception:
@@ -27,19 +107,17 @@ class OwnTransferView(APIView):
             if amount <= 0:
                 return Response({"error": "Amount must be greater than zero"}, status=400)
 
-            
             try:
                 source_acc = Account.objects.get(
-                    Q(id=from_id) & 
+                    Q(id=from_id) &
                     (Q(customer__user=request.user) | Q(customer__parent_customer__user=request.user))
                 )
             except Account.DoesNotExist:
                 return Response({"error": f"Source account {from_id} not found or unauthorized"}, status=404)
 
-            
             try:
                 target_acc = Account.objects.get(
-                    Q(id=to_id) & 
+                    Q(id=to_id) &
                     (Q(customer__user=request.user) | Q(customer__parent_customer__user=request.user))
                 )
             except Account.DoesNotExist:
@@ -85,6 +163,7 @@ class OwnTransferView(APIView):
             print(f"CRITICAL ERROR: {str(e)}")
             return Response({"error": str(e)}, status=400)
 
+
 class NationalTransferView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -93,27 +172,22 @@ class NationalTransferView(APIView):
         try:
             from_id = data.get('from_account')
             recipient_account = data.get('recipient_account', '').replace(' ', '')
-            
-            
             amount = Decimal(str(data.get('amount', '0')))
 
             source_acc = Account.objects.get(id=from_id, customer__user=request.user)
 
-            
             if source_acc.account_type == 'JUNIOR':
                 return Response({"error": "Junior accounts cannot transfer outside"}, status=403)
 
             if source_acc.balance < amount:
                 return Response({"error": "Insufficient funds"}, status=400)
 
-            # Szukamy odbiorcy w naszym banku
             target_acc = Account.objects.filter(iban=recipient_account).first()
 
             if not target_acc:
                 return Response({"error": "External banking networks are not yet connected"}, status=400)
 
             with transaction.atomic():
-                # 1. Tworzymy Transfer
                 transfer = Transfer.objects.create(
                     user=request.user,
                     from_account=source_acc,
@@ -125,22 +199,18 @@ class NationalTransferView(APIView):
                     status='COMPLETED'
                 )
 
-                
                 source_acc.balance -= amount
                 target_acc.balance += amount
                 source_acc.save()
                 target_acc.save()
 
-                
                 Transaction.objects.create(
                     user=request.user, account=source_acc, transfer=transfer,
                     amount=-amount, title=transfer.title,
                     balance_after=source_acc.balance
                 )
 
-
                 recipient_user = target_acc.customer.user or target_acc.customer.parent_customer.user
-
                 Transaction.objects.create(
                     user=recipient_user, account=target_acc, transfer=transfer,
                     amount=amount, title=transfer.title,
