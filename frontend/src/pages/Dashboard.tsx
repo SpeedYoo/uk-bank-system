@@ -5,7 +5,6 @@ import {
 } from 'lucide-react';
 import api from '../api/axios';
 import AddMoneyModal from '../components/AddMoneyModal';
-import AddJuniorModal from '../components/AddJuniorModal';
 import TransferModal from '../components/TransferModal';
 import RecentTransactions from '../components/RecentTransactions';
 
@@ -27,7 +26,6 @@ const Dashboard = () => {
     const [accountCount, setAccountCount] = useState(0);
     const [accounts, setAccounts] = useState<any[]>([]);
     const [isAddMoneyOpen, setIsAddMoneyOpen] = useState(false);
-    const [isAddJuniorOpen, setIsAddJuniorOpen] = useState(false);
     const [isTransferOpen, setIsTransferOpen] = useState(false);
 
     const fetchData = async () => {
@@ -157,16 +155,6 @@ const Dashboard = () => {
                             );
                         })}
 
-                        {/* DODAJ KONTO JUNIOR */}
-                        <button
-                            onClick={() => setIsAddJuniorOpen(true)}
-                            className="bg-transparent border-2 border-dashed border-[var(--border)] hover:border-[#00FF85] hover:bg-[#00FF85]/5 rounded-3xl p-6 flex flex-col items-center justify-center text-gray-500 hover:text-[#00FF85] transition-all min-h-[180px] group"
-                        >
-                            <div className="w-12 h-12 bg-[var(--bg-elevated)] group-hover:bg-[#00FF85]/20 rounded-full flex items-center justify-center mb-3 transition-colors">
-                                <Plus size={24} className="text-[var(--text-muted)] group-hover:text-[#00FF85] transition-colors" />
-                            </div>
-                            <span className="font-semibold text-sm">Add Junior Account</span>
-                        </button>
                     </section>
 
                     {/* SEKCJA 3: TRANSAKCJE */}
@@ -183,11 +171,6 @@ const Dashboard = () => {
                 onSuccess={() => fetchData()}
             />
 
-            <AddJuniorModal
-                isOpen={isAddJuniorOpen}
-                onClose={() => setIsAddJuniorOpen(false)}
-                onSuccess={() => fetchData()}
-            />
             <TransferModal
                 isOpen={isTransferOpen}
                 onClose={() => setIsTransferOpen(false)}

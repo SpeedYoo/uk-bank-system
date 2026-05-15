@@ -5,6 +5,7 @@ import ConfirmActionModal from '../components/ConfirmActionModal';
 import CardDetailsModal from '../components/CardDetailsModal';
 import CardManager from '../components/CardManager';
 import TopUpModal from '../components/TopUpModal';
+import AddJuniorModal from '../components/AddJuniorModal';
 
 interface ContextType {
     firstName: string;
@@ -34,7 +35,8 @@ const Accounts = () => {
     const [blikTxLimit, setBlikTxLimit] = useState('');
     const [blikDailyLimit, setBlikDailyLimit] = useState('');
     const [isSavingLimits, setIsSavingLimits] = useState(false);
-    const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false); 
+    const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false);
+    const [isAddJuniorOpen, setIsAddJuniorOpen] = useState(false);
 
     
     const refreshData = async () => {
@@ -189,6 +191,18 @@ const Accounts = () => {
                                 </button>
                             );
                         })}
+                        <button
+                            onClick={() => setIsAddJuniorOpen(true)}
+                            className="flex items-center gap-3 shrink-0 lg:shrink w-[220px] lg:w-full p-2.5 rounded-xl transition-all border border-dashed hover:border-[#00FF85]/50 hover:bg-[#00FF85]/5 group"
+                            style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}
+                        >
+                            <div className="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center group-hover:bg-[#00FF85]/20 transition-colors" style={{ backgroundColor: 'var(--bg-elevated)' }}>
+                                <svg className="w-4 h-4 group-hover:text-[#00FF85] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                            </div>
+                            <span className="text-sm font-semibold group-hover:text-[#00FF85] transition-colors">Add Junior Account</span>
+                        </button>
                     </div>
                 </div>
 
@@ -269,14 +283,23 @@ const Accounts = () => {
             <ConfirmActionModal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} onConfirm={handleDeleteCard} loading={isDeleting} title="Delete Card" message="Are you sure you want to permanently delete this card?" />
             <CardDetailsModal isOpen={isDetailsModalOpen} onClose={() => setIsDetailsModalOpen(false)} card={selectedAccount?.cards?.find((c: any) => c.id === activeCardId)} />
 
-            <TopUpModal 
-                isOpen={isTopUpModalOpen} 
-                onClose={() => setIsTopUpModalOpen(false)} 
+            <TopUpModal
+                isOpen={isTopUpModalOpen}
+                onClose={() => setIsTopUpModalOpen(false)}
                 cardId={activeCardId}
                 onSuccess={() => {
                     setIsTopUpModalOpen(false);
-                    refreshData(); 
-                }} 
+                    refreshData();
+                }}
+            />
+
+            <AddJuniorModal
+                isOpen={isAddJuniorOpen}
+                onClose={() => setIsAddJuniorOpen(false)}
+                onSuccess={() => {
+                    setIsAddJuniorOpen(false);
+                    refreshData();
+                }}
             />
         </>
     );
