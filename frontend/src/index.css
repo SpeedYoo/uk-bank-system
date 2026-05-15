@@ -6,3 +6,34 @@ input::-webkit-inner-spin-button {
   margin: 0;
 }
 
+/* ─── Theme variables ─────────────────────────────────── */
+:root {
+  --bg-base:     #0B0E14;
+  --bg-surface:  #161B22;
+  --bg-elevated: #1F262E;
+  --border:      #1f2937;
+  --text-primary:   #ffffff;
+  --text-secondary: #9ca3af;
+  --text-muted:     #6b7280;
+}
+
+html.light {
+  --bg-base:     #f1f5f9;
+  --bg-surface:  #ffffff;
+  --bg-elevated: #f8fafc;
+  --border:      #e2e8f0;
+  --text-primary:   #0f172a;
+  --text-secondary: #475569;
+  --text-muted:     #94a3b8;
+  color-scheme: light;
+}
+
+/* ─── Animations ──────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.25s ease-out;
+}

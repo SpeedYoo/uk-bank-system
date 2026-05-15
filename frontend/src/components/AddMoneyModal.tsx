@@ -71,18 +71,18 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose, accounts
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
             <style>{hideSpinnersCSS}</style>
 
-            <div className="bg-[#161B22] border border-gray-800 w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden">
+            <div className="bg-[var(--bg-surface)] border border-[var(--border)] w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden">
 
                 {isSuccess && (
-                    <div className="absolute inset-0 bg-[#161B22] z-50 flex flex-col items-center justify-center animate-in fade-in duration-300">
+                    <div className="absolute inset-0 bg-[var(--bg-surface)] z-50 flex flex-col items-center justify-center animate-in fade-in duration-300">
                         <CheckCircle2 size={64} className="text-[#00FF85] mb-4 animate-bounce" />
-                        <h3 className="text-xl font-bold text-white">Deposit Successful!</h3>
+                        <h3 className="text-xl font-bold text-[var(--text-primary)]">Deposit Successful!</h3>
                     </div>
                 )}
 
                 <div className="flex justify-between items-center mb-8">
                     <div>
-                        <h2 className="text-xl font-bold text-white tracking-tight">Add Money</h2>
+                        <h2 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">Add Money</h2>
                         <p className="text-gray-500 text-xs mt-0.5">Deposit funds into your account</p>
                     </div>
                     <button
@@ -94,7 +94,7 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose, accounts
                 </div>
 
                 <div className="mb-6 relative">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 block ml-1">Deposit To</label>
+                    <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-3 block ml-1">Deposit To</label>
 
                     {isDropdownOpen && (
                         <div className="fixed inset-0 z-10" onClick={() => setIsDropdownOpen(false)} />
@@ -103,7 +103,7 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose, accounts
                     <div className="relative z-20">
                         <div
                             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                            className={`w-full bg-[#0B0E14] border ${isDropdownOpen ? (selectedAccount?.account_type === 'JUNIOR' ? 'border-purple-500/50' : 'border-[#00FF85]/50') : 'border-gray-800'} rounded-2xl p-4 pl-14 pr-4 text-white font-medium transition-all cursor-pointer flex items-center justify-between group`}
+                            className={`w-full bg-[var(--bg-base)] border ${isDropdownOpen ? (selectedAccount?.account_type === 'JUNIOR' ? 'border-purple-500/50' : 'border-[#00FF85]/50') : 'border-[var(--border)]'} rounded-2xl p-4 pl-14 pr-4 text-white font-medium transition-all cursor-pointer flex items-center justify-between group`}
                         >
                             <div className={`absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center pointer-events-none transition-colors duration-300 ${selectedAccount?.account_type === 'JUNIOR' ? 'bg-purple-500/10 text-purple-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
                                 {selectedAccount?.account_type === 'JUNIOR' ? <User size={16} /> : <Home size={16} />}
@@ -117,7 +117,7 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose, accounts
                         </div>
 
                         {isDropdownOpen && (
-                            <div className="absolute top-full left-0 right-0 mt-2 bg-[#0B0E14] border border-gray-800 rounded-2xl overflow-hidden shadow-[0_15px_40px_-10px_rgba(0,0,0,0.5)] z-30 animate-in fade-in slide-in-from-top-2 duration-200">
+                            <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--bg-base)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-[0_15px_40px_-10px_rgba(0,0,0,0.5)] z-30 animate-in fade-in slide-in-from-top-2 duration-200">
                                 {accounts.map(acc => {
                                     const isSelected = selectedAccountId === acc.id;
                                     return (
@@ -129,7 +129,7 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose, accounts
                                             }}
                                             className={`p-4 pl-14 cursor-pointer transition-colors relative flex items-center ${isSelected
                                                 ? (acc.account_type === 'JUNIOR' ? 'bg-purple-500/10 text-purple-400' : 'bg-emerald-500/10 text-[#00FF85]')
-                                                : 'text-gray-400 hover:bg-[#161B22] hover:text-white'
+                                                : 'text-gray-400 hover:bg-[var(--bg-surface)] hover:text-white'
                                                 }`}
                                         >
                                             <span className="font-medium">
@@ -150,27 +150,27 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose, accounts
                 </div>
 
                 <div className="mb-8">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 block ml-1">Amount</label>
+                    <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-3 block ml-1">Amount</label>
                     <div className="relative group">
                         <span className="absolute left-6 top-1/2 -translate-y-1/2 text-4xl font-bold text-[#00FF85]">£</span>
                         <input
                             type="number"
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
-                            className="w-full bg-[#0B0E14] border border-gray-800 rounded-2xl p-6 pl-14 text-4xl font-bold text-white focus:outline-none focus:border-[#00FF85]/50 transition-all placeholder:text-gray-700/40"
+                            className="w-full bg-[var(--bg-base)] border border-[var(--border)] rounded-2xl p-6 pl-14 text-4xl font-bold text-[var(--text-primary)] focus:outline-none focus:border-[#00FF85]/50 transition-all placeholder:text-[var(--text-muted)]/50"
                             placeholder="0.00"
                         />
                     </div>
                 </div>
 
                 <div className="mb-8">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 block ml-1">Quick Add</label>
+                    <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-3 block ml-1">Quick Add</label>
                     <div className="grid grid-cols-3 gap-3">
                         {[10, 50, 100].map(val => (
                             <button
                                 key={val}
                                 onClick={() => handleQuickAdd(val)}
-                                className="bg-[#1F262E] hover:bg-[#2a343f] text-white py-3 rounded-xl font-bold text-sm transition-all active:scale-95 border border-gray-800"
+                                className="bg-[var(--bg-elevated)] hover:bg-[#2a343f] text-white py-3 rounded-xl font-bold text-sm transition-all active:scale-95 border border-[var(--border)]"
                             >
                                 +£{val}
                             </button>

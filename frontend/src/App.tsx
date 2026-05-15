@@ -6,13 +6,16 @@ import ProtectedRoute from './components/ProtectedRoute';
 import JuniorRoute from './components/JuniorRoute';
 import Dashboard from './pages/Dashboard';
 import Accounts from './pages/Accounts';
+import Settings from './pages/Settings';
 import JuniorDashboard from './pages/JuniorDashboard';
 import PublicRoute from './components/PublicRoute';
 import Layout from './components/Layout';
 import JuniorLayout from './components/JuniorLayout';
+import { ThemeProvider } from './context/ThemeContext';
 
 function App() {
   return (
+    <ThemeProvider>
     <Router>
       <Routes>
         
@@ -52,6 +55,7 @@ function App() {
             <Route path="/setup" element={<SetupPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/accounts" element={<Accounts />} />
+            <Route path="/settings" element={<Settings />} />
           </Route>
         </Route>
         
@@ -64,9 +68,10 @@ function App() {
 
         {/* CATCH ALL */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        
+
       </Routes>
     </Router>
+    </ThemeProvider>
   );
 }
 
