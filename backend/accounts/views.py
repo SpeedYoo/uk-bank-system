@@ -14,6 +14,7 @@ from datetime import datetime, date
 import re
 from limits.models import AccountLimits
 from cards.serializers import CardSerializer
+from transactions.models import Transaction
 
 class MyAccountsListView(generics.ListAPIView):
     serializer_class = AccountSerializer
@@ -97,10 +98,18 @@ class AccountDepositView(APIView):
         
         if serializer.is_valid():
             amount_to_add = serializer.validated_data['amount']
-            
+
             account.balance += amount_to_add
             account.save()
-            
+
+            Transaction.objects.create(
+                user=request.user,
+                account=account,
+                amount=amount_to_add,
+                title='Add money',
+                balance_after=account.balance,
+            )
+
             return Response({
                 "message": "Deposit successful",
                 "new_balance": str(account.balance)
