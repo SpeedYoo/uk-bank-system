@@ -6,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import JuniorRoute from './components/JuniorRoute';
 import Dashboard from './pages/Dashboard';
 import Accounts from './pages/Accounts';
+import Cards from './pages/Cards';
 import History from './pages/History';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
@@ -57,6 +58,7 @@ function App() {
             <Route path="/setup" element={<SetupPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/accounts" element={<Accounts />} />
+            <Route path="/cards" element={<Cards />} />
             <Route path="/history" element={<History />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/profile" element={<Profile />} />
