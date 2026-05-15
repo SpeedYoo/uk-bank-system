@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useOutletContext, useLocation } from 'react-router-dom'; // DODANO useLocation
 import api from '../api/axios';
 import ConfirmActionModal from '../components/ConfirmActionModal';
@@ -11,6 +11,31 @@ interface ContextType {
     firstName: string;
     lastName: string;
 }
+
+const CopyButton: React.FC<{ value: string }> = ({ value }) => {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = useCallback(() => {
+        navigator.clipboard.writeText(value).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        });
+    }, [value]);
+
+    return (
+        <button
+            onClick={handleCopy}
+            title={copied ? 'Copied!' : 'Copy'}
+            className="ml-2 shrink-0 px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all"
+            style={copied
+                ? { backgroundColor: '#00FF85', color: '#000' }
+                : { backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border)' }
+            }
+        >
+            {copied ? 'Copied!' : 'Copy'}
+        </button>
+    );
+};
 
 const Accounts = () => {
     const context = useOutletContext<ContextType>();
@@ -237,13 +262,19 @@ const Accounts = () => {
                                         </div>
                                         <div className="flex justify-between items-center gap-4 border-b border-[var(--border)]/50 pb-2">
                                             <span className="text-[var(--text-muted)] font-bold text-[9px] sm:text-[10px] uppercase tracking-widest whitespace-nowrap">Account Number</span>
-                                            <span className="font-mono text-[var(--text-secondary)] text-xs sm:text-sm text-right">{selectedAccount.account_number || 'N/A'}</span>
+                                            <div className="flex items-center">
+                                                <span className="font-mono text-[var(--text-secondary)] text-xs sm:text-sm text-right">{selectedAccount.account_number || 'N/A'}</span>
+                                                {selectedAccount.account_number && <CopyButton value={selectedAccount.account_number} />}
+                                            </div>
                                         </div>
                                         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-1 sm:gap-4 pt-0.5">
                                             <span className="text-[var(--text-muted)] font-bold text-[9px] sm:text-[10px] uppercase tracking-widest whitespace-nowrap">IBAN</span>
-                                            <span className="font-mono text-[9px] sm:text-[10px] text-[var(--text-muted)] sm:text-right break-all">
-                                                {selectedAccount.iban?.match(/.{1,4}/g)?.join(' ') || 'N/A'}
-                                            </span>
+                                            <div className="flex items-center">
+                                                <span className="font-mono text-[9px] sm:text-[10px] text-[var(--text-muted)] sm:text-right break-all">
+                                                    {selectedAccount.iban?.match(/.{1,4}/g)?.join(' ') || 'N/A'}
+                                                </span>
+                                                {selectedAccount.iban && <CopyButton value={selectedAccount.iban} />}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
