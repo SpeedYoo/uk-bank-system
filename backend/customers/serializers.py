@@ -7,11 +7,15 @@ class CustomerSerializer(serializers.ModelSerializer):
     firstName = serializers.CharField(source='first_name', min_length=2, max_length=50)
     lastName = serializers.CharField(source='last_name', min_length=2, max_length=50)
     dob = serializers.DateField(source='date_of_birth')
+    email = serializers.SerializerMethodField()
+
+    def get_email(self, obj):
+        return obj.user.email if obj.user else None
 
     class Meta:
         model = Customer
         fields = [
-            'firstName', 'lastName', 'dob', 'phone', 
+            'firstName', 'lastName', 'email', 'dob', 'phone',
             'country', 'city', 'postcode', 'street'
         ]
 
