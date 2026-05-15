@@ -26,3 +26,17 @@ class Transfer(models.Model):
 
     def __str__(self):
         return f"Transfer {self.id} to {self.recipient_account}"
+
+
+class SavedRecipient(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='saved_recipients')
+    name = models.CharField(max_length=255)
+    account = models.CharField(max_length=34)  # IBAN
+    routing_method = models.CharField(max_length=10, default='FPS')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} ({self.account})"
