@@ -70,11 +70,13 @@ class OwnTransferView(APIView):
 
                 Transaction.objects.create(
                     user=request.user, account=source_acc, transfer=transfer,
-                    amount=-amount, title=f"To {target_acc.account_type}"
+                    amount=-amount, title=f"To {target_acc.account_type}",
+                    balance_after=source_acc.balance
                 )
                 Transaction.objects.create(
                     user=request.user, account=target_acc, transfer=transfer,
-                    amount=amount, title=f"From {source_acc.account_type}"
+                    amount=amount, title=f"From {source_acc.account_type}",
+                    balance_after=target_acc.balance
                 )
 
             return Response({"status": "success"}, status=200)
@@ -132,15 +134,17 @@ class NationalTransferView(APIView):
                 
                 Transaction.objects.create(
                     user=request.user, account=source_acc, transfer=transfer,
-                    amount=-amount, title=transfer.title
+                    amount=-amount, title=transfer.title,
+                    balance_after=source_acc.balance
                 )
-                
-                
+
+
                 recipient_user = target_acc.customer.user or target_acc.customer.parent_customer.user
-                
+
                 Transaction.objects.create(
                     user=recipient_user, account=target_acc, transfer=transfer,
-                    amount=amount, title=transfer.title
+                    amount=amount, title=transfer.title,
+                    balance_after=target_acc.balance
                 )
 
             return Response({"status": "success"}, status=200)

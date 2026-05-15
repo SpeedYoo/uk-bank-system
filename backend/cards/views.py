@@ -120,10 +120,11 @@ class TopUpPrepaidView(APIView):
             card.save()
 
             Transaction.objects.create(
-                user=request.user, 
-                account=account, 
-                amount=-amount, 
-                title=f"Top-up Prepaid Card {card.masked_number}"
+                user=request.user,
+                account=account,
+                amount=-amount,
+                title=f"Top-up Prepaid Card {card.masked_number}",
+                balance_after=account.balance
             )
 
         return Response({

@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import {
-    Send, Plus, Home, ChevronRight, Download
+    Send, Plus, Home, ChevronRight
 } from 'lucide-react';
 import api from '../api/axios';
 import AddMoneyModal from '../components/AddMoneyModal';
 import AddJuniorModal from '../components/AddJuniorModal';
 import TransferModal from '../components/TransferModal';
+import TransactionHistory from '../components/TransactionHistory';
 
 
 interface ContextType {
@@ -169,22 +170,7 @@ const Dashboard = () => {
                     </section>
 
                     {/* SEKCJA 3: TRANSAKCJE */}
-                    <section className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-6">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b border-[var(--border)] pb-6">
-                            <div className="flex bg-[var(--bg-base)] p-1 rounded-xl w-full sm:w-auto overflow-x-auto no-scrollbar">
-                                <button className="px-6 py-2 bg-[var(--bg-elevated)] text-[var(--text-primary)] rounded-lg text-sm font-medium shadow-sm whitespace-nowrap">All</button>
-                                <button className="px-6 py-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded-lg text-sm font-medium transition-colors whitespace-nowrap">Money in</button>
-                                <button className="px-6 py-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded-lg text-sm font-medium transition-colors whitespace-nowrap">Money out</button>
-                            </div>
-                            <button className="text-[#00FF85] hover:text-[#00e074] text-sm font-bold flex items-center gap-2 transition-colors whitespace-nowrap">
-                                <Download size={16} /> Download
-                            </button>
-                        </div>
-
-                        <div className="space-y-1 text-center py-10 text-gray-600">
-                            <p className="text-sm">No transactions yet.</p>
-                        </div>
-                    </section>
+                    <TransactionHistory accounts={accounts} />
 
                 </div>
             </div>
