@@ -60,7 +60,7 @@ class CreateJuniorAccountView(APIView):
         except ValueError:
             return Response({"error": "Invalid date format. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
 
-        Customer.objects.create(
+        junior_customer = Customer.objects.create(
             user=None,
             first_name=first_name.title(),
             last_name=last_name.title(),
@@ -74,7 +74,7 @@ class CreateJuniorAccountView(APIView):
             kyc_verified=True
         )
 
-        return Response({"message": "Junior account created"}, status=status.HTTP_201_CREATED)
+        return Response({"message": "Junior account created", "customer_id": junior_customer.id}, status=status.HTTP_201_CREATED)
 
 
 class AccountDepositView(APIView):
