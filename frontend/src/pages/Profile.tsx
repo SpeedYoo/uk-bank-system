@@ -74,7 +74,7 @@ const Profile = () => {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const res = await api.get('/customers/me/');
+                const res = await api.get('/me/');
                 setData(res.data);
             } catch (err) {
                 console.error('Failed to load profile:', err);

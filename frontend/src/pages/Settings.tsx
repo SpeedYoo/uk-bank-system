@@ -18,8 +18,7 @@ const Settings = () => {
                 setFirstName(res.data.firstName);
                 setLastName(res.data.lastName);
 
-                const userRes = await api.get('/setup/status/');
-                setEmail(userRes.data.email || '');
+                setEmail(res.data.email || '');
             } catch {}
         };
         load();
