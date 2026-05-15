@@ -3,11 +3,13 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import SetupPage from './pages/SetupPage';
 import ProtectedRoute from './components/ProtectedRoute';
+import JuniorRoute from './components/JuniorRoute';
 import Dashboard from './pages/Dashboard';
 import Accounts from './pages/Accounts';
-// Importujemy naszego strażnika
-import PublicRoute from './components/PublicRoute'; 
+import JuniorDashboard from './pages/JuniorDashboard';
+import PublicRoute from './components/PublicRoute';
 import Layout from './components/Layout';
+import JuniorLayout from './components/JuniorLayout';
 
 function App() {
   return (
@@ -53,7 +55,14 @@ function App() {
           </Route>
         </Route>
         
-        {/* CATCH ALL - Redirect unknown paths to dashboard (który i tak wyrzuci na login, jeśli ktoś nie ma tokena) */}
+        {/* JUNIOR ROUTES */}
+        <Route element={<JuniorRoute />}>
+          <Route element={<JuniorLayout />}>
+            <Route path="/junior/dashboard" element={<JuniorDashboard />} />
+          </Route>
+        </Route>
+
+        {/* CATCH ALL */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
         
       </Routes>

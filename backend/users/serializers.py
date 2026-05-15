@@ -20,12 +20,17 @@ class CustomLoginSerializer(TokenObtainPairSerializer):
         
         
         customer_profile = Customer.objects.filter(user=self.user).first()
-        
-        if customer_profile and customer_profile.kyc_verified:
+
+        is_junior = bool(customer_profile and customer_profile.parent_customer_id)
+        data['is_junior'] = is_junior
+
+        if is_junior:
+            data['is_setup_complete'] = True
+        elif customer_profile and customer_profile.kyc_verified:
             data['is_setup_complete'] = True
         else:
             data['is_setup_complete'] = False
-        
+
         return data
 
 class RegisterSerializer(serializers.ModelSerializer):

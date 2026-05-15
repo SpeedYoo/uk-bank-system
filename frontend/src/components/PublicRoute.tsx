@@ -1,15 +1,15 @@
 import { Navigate } from 'react-router-dom';
-import {type ReactNode } from 'react'; 
+import { type ReactNode } from 'react';
 
-// Zmieniamy JSX.Element na ReactNode
 const PublicRoute = ({ children }: { children: ReactNode }) => {
     const token = localStorage.getItem('access_token');
-    
+    const isJunior = localStorage.getItem('is_junior') === 'true';
+
     if (token) {
-        return <Navigate to="/dashboard" replace />;
+        return <Navigate to={isJunior ? '/junior/dashboard' : '/dashboard'} replace />;
     }
 
-    return <>{children}</>; 
+    return <>{children}</>;
 };
 
 export default PublicRoute;
