@@ -7,7 +7,7 @@ import api from '../api/axios';
 import AddMoneyModal from '../components/AddMoneyModal';
 import AddJuniorModal from '../components/AddJuniorModal';
 import TransferModal from '../components/TransferModal';
-import TransactionHistory from '../components/TransactionHistory';
+import RecentTransactions from '../components/RecentTransactions';
 
 
 interface ContextType {
@@ -170,7 +170,7 @@ const Dashboard = () => {
                     </section>
 
                     {/* SEKCJA 3: TRANSAKCJE */}
-                    <TransactionHistory accounts={accounts} />
+                    <RecentTransactions accounts={accounts} />
 
                 </div>
             </div>

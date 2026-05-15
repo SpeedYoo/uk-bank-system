@@ -8,6 +8,7 @@ import {
     Settings,
     X,
     LogOut,
+    History,
 } from 'lucide-react';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import api from '../api/axios';
@@ -52,6 +53,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     const menuItems = [
         { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
         { name: 'Accounts',  path: '/accounts',  icon: Wallet },
+        { name: 'History',   path: '/history',   icon: History },
         { name: 'Payments',  path: '/payments',  icon: ArrowRightLeft },
         { name: 'Analytics', path: '/analytics', icon: PieChart },
         { name: 'Cards',     path: '/cards',     icon: CreditCard },
