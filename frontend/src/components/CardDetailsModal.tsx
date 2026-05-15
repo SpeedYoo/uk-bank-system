@@ -30,7 +30,7 @@ const CardDetailsModal: React.FC<CardDetailsModalProps> = ({ isOpen, onClose, ca
 
     return (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
-            <div className="bg-[#161B22] border border-gray-800 w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="bg-[var(--bg-surface)] border border-[var(--border)] w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-200">
                 
                 {/* Header */}
                 <div className="flex justify-between items-center mb-8">
@@ -39,8 +39,8 @@ const CardDetailsModal: React.FC<CardDetailsModalProps> = ({ isOpen, onClose, ca
                             <ShieldCheck className="text-purple-400" size={20} />
                         </div>
                         <div>
-                            <h2 className="text-lg font-bold text-white">Security Details</h2>
-                            <p className="text-[10px] text-gray-500 uppercase tracking-widest">{card.card_type} Card</p>
+                            <h2 className="text-lg font-bold text-[var(--text-primary)]">Security Details</h2>
+                            <p className="text-[10px] text-[var(--text-muted)] uppercase tracking-widest">{card.card_type} Card</p>
                         </div>
                     </div>
                     <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors">
@@ -50,10 +50,10 @@ const CardDetailsModal: React.FC<CardDetailsModalProps> = ({ isOpen, onClose, ca
 
                 <div className="space-y-5">
                     {/* Card Number */}
-                    <div className="bg-[#0B0E14] p-5 rounded-2xl border border-gray-800">
-                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Full Card Number</label>
+                    <div className="bg-[var(--bg-base)] p-5 rounded-2xl border border-[var(--border)]">
+                        <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest block mb-2">Full Card Number</label>
                         <div className="flex justify-between items-center">
-                            <span className="font-mono text-lg text-white tracking-wider">
+                            <span className="font-mono text-lg text-[var(--text-primary)] tracking-wider">
                                 {showFullNumber ? formatFullNumber(card.full_number) : "**** **** **** " + (card.full_number?.slice(-4) || "0000")}
                             </span>
                             <button onClick={() => setShowFullNumber(!showFullNumber)} className="text-purple-400 hover:text-purple-300 transition-colors">
@@ -64,16 +64,16 @@ const CardDetailsModal: React.FC<CardDetailsModalProps> = ({ isOpen, onClose, ca
 
                     <div className="grid grid-cols-2 gap-4">
                         {/* Expiry */}
-                        <div className="bg-[#0B0E14] p-5 rounded-2xl border border-gray-800">
-                            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Expiry Date</label>
-                            <span className="font-mono text-lg text-white">{card.expiry_date}</span>
+                        <div className="bg-[var(--bg-base)] p-5 rounded-2xl border border-[var(--border)]">
+                            <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest block mb-2">Expiry Date</label>
+                            <span className="font-mono text-lg text-[var(--text-primary)]">{card.expiry_date}</span>
                         </div>
                         
                         {/* CVV */}
-                        <div className="bg-[#0B0E14] p-5 rounded-2xl border border-gray-800">
-                            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">CVV Code</label>
+                        <div className="bg-[var(--bg-base)] p-5 rounded-2xl border border-[var(--border)]">
+                            <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest block mb-2">CVV Code</label>
                             <div className="flex justify-between items-center">
-                                <span className="font-mono text-lg text-white">{showCVV ? card.cvv : "***"}</span>
+                                <span className="font-mono text-lg text-[var(--text-primary)]">{showCVV ? card.cvv : "***"}</span>
                                 <button onClick={() => setShowCVV(!showCVV)} className="text-purple-400 hover:text-purple-300">
                                     {showCVV ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
@@ -88,7 +88,7 @@ const CardDetailsModal: React.FC<CardDetailsModalProps> = ({ isOpen, onClose, ca
                             <label className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">Card PIN</label>
                         </div>
                         <div className="flex justify-between items-center">
-                            <span className="font-mono text-3xl text-white tracking-[0.4em]">
+                            <span className="font-mono text-3xl text-[var(--text-primary)] tracking-[0.4em]">
                                 {showPIN ? card.pin : "••••"}
                             </span>
                             <button 
@@ -101,7 +101,7 @@ const CardDetailsModal: React.FC<CardDetailsModalProps> = ({ isOpen, onClose, ca
                     </div>
                 </div>
 
-                <div className="mt-8 pt-6 border-t border-gray-800/50">
+                <div className="mt-8 pt-6 border-t border-[var(--border)]/50">
                     <p className="text-gray-500 text-[10px] text-center leading-relaxed">
                         For security reasons, never share these details. <br/> 
                         Lyo Bank staff will never ask for your PIN or CVV.

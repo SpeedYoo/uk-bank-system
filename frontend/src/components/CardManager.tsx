@@ -94,7 +94,7 @@ const CardManager: React.FC<Props> = ({
   const renderAddCard = () => (
     <button
       onClick={onIssueCard}
-      className="w-full max-w-[360px] mx-auto aspect-[1.58/1] border-2 border-dashed border-gray-800 rounded-2xl flex flex-col items-center justify-center hover:border-white hover:text-white text-gray-500 transition-colors group"
+      className="w-full max-w-[360px] mx-auto aspect-[1.58/1] border-2 border-dashed border-[var(--border)] rounded-2xl flex flex-col items-center justify-center hover:border-[var(--text-primary)] hover:text-[var(--text-primary)] text-[var(--text-muted)] transition-colors group"
     >
       <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-800 group-hover:bg-white/10 rounded-full flex items-center justify-center mb-2 transition-colors">
         <Plus className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -109,13 +109,13 @@ const CardManager: React.FC<Props> = ({
     <div className="grid grid-cols-1 xl:grid-cols-[1.5fr_1fr] gap-4 md:gap-5 mb-4">
 
       {/* --- LEWA KOLUMNA: KARTY --- */}
-      <div className="bg-[#161B22] border border-gray-800 rounded-3xl p-5 md:p-6 flex flex-col shadow-lg min-h-[340px] w-full overflow-hidden">
+      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-5 md:p-6 flex flex-col shadow-lg min-h-[340px] w-full overflow-hidden">
 
         {/* NAGŁÓWEK / ZAKŁADKI */}
-        <div className="flex flex-wrap justify-between items-center border-b border-gray-800 pb-3.5 mb-5 gap-3">
+        <div className="flex flex-wrap justify-between items-center border-b border-[var(--border)] pb-3.5 mb-5 gap-3">
           <div className="flex gap-4 sm:gap-6 overflow-x-auto no-scrollbar w-full sm:w-auto">
             {isJunior ? (
-              <div className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-white relative pb-1.5 whitespace-nowrap">
+              <div className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-primary)] relative pb-1.5 whitespace-nowrap">
                 PREPAID CARD
                 <div className="absolute bottom-0 left-0 w-full h-[2px] bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)]" />
               </div>
@@ -124,7 +124,7 @@ const CardManager: React.FC<Props> = ({
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] transition-all relative pb-1.5 whitespace-nowrap ${activeTab === tab ? 'text-white' : 'text-gray-500 hover:text-gray-300'
+                  className={`text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] transition-all relative pb-1.5 whitespace-nowrap ${activeTab === tab ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
                     }`}
                 >
                   {tab}
@@ -135,7 +135,7 @@ const CardManager: React.FC<Props> = ({
               ))
             )}
           </div>
-          <div className="text-[9px] text-gray-500 font-bold bg-white/5 px-2 py-1 rounded whitespace-nowrap self-start sm:self-auto">
+          <div className="text-[9px] text-[var(--text-muted)] font-bold bg-[var(--bg-elevated)] px-2 py-1 rounded whitespace-nowrap self-start sm:self-auto">
             {cardsInTab.length} / {isJunior ? '1' : '2'} cards
           </div>
         </div>
@@ -155,29 +155,29 @@ const CardManager: React.FC<Props> = ({
         </div>
 
         {/* PRZYCISKI AKCJI */}
-        <div className={`grid ${activeCard?.card_type === 'PREPAID' ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3'} gap-2 sm:gap-3 mt-auto pt-4 border-t border-gray-800/50`}>
+        <div className={`grid ${activeCard?.card_type === 'PREPAID' ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3'} gap-2 sm:gap-3 mt-auto pt-4 border-t border-[var(--border)]/50`}>
           
           {/* NOWY PRZYCISK: TOP UP (Pojawia się TYLKO gdy aktywna jest karta PREPAID) */}
           {activeCard?.card_type === 'PREPAID' && (
             <button onClick={onTopUpClick} disabled={!activeCard}
-              className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition-all text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-center ${activeCard ? 'bg-[#0B0E14] hover:bg-[#00FF85]/10 border-gray-800 text-gray-400 hover:text-[#00FF85] cursor-pointer' : 'bg-[#0B0E14]/40 border-gray-900 text-gray-700 opacity-50 cursor-not-allowed'}`}>
+              className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition-all text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-center ${activeCard ? 'bg-[var(--bg-base)] hover:bg-[#00FF85]/10 border-[var(--border)] text-gray-400 hover:text-[#00FF85] cursor-pointer' : 'bg-[var(--bg-base)]/40 border-[var(--border)] text-[var(--text-muted)] opacity-40 cursor-not-allowed'}`}>
               <Plus className="w-4 h-4 sm:w-[16px] sm:h-[16px]" color={activeCard ? '#00FF85' : 'currentColor'} />
               Top Up
             </button>
           )}
 
           <button onClick={onDetails} disabled={!activeCard}
-            className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition-all text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-center ${activeCard ? 'bg-[#0B0E14] hover:bg-white/5 border-gray-800 text-gray-400 hover:text-white cursor-pointer' : 'bg-[#0B0E14]/40 border-gray-900 text-gray-700 opacity-50 cursor-not-allowed'}`}>
+            className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition-all text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-center ${activeCard ? 'bg-[var(--bg-base)] hover:bg-white/5 border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer' : 'bg-[var(--bg-base)]/40 border-[var(--border)] text-[var(--text-muted)] opacity-40 cursor-not-allowed'}`}>
             <Eye className="w-4 h-4 sm:w-[16px] sm:h-[16px] text-gray-400" color={activeCard ? (isJunior ? '#c084fc' : '#34d399') : 'currentColor'} />
             Details
           </button>
           <button onClick={onFreeze} disabled={!activeCard}
-            className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition-all text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-center ${activeCard ? (activeCard.status === 'FROZEN' ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' : 'bg-[#0B0E14] hover:bg-white/5 border-gray-800 text-gray-400 hover:text-white') : 'bg-[#0B0E14]/40 border-gray-900 text-gray-700 opacity-50 cursor-not-allowed'}`}>
+            className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition-all text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-center ${activeCard ? (activeCard.status === 'FROZEN' ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' : 'bg-[var(--bg-base)] hover:bg-white/5 border-[var(--border)] text-gray-400 hover:text-white') : 'bg-[var(--bg-base)]/40 border-[var(--border)] text-[var(--text-muted)] opacity-40 cursor-not-allowed'}`}>
             <Snowflake className="w-4 h-4 sm:w-[16px] sm:h-[16px]" color={activeCard?.status === 'FROZEN' ? '#60a5fa' : 'currentColor'} />
             {activeCard?.status === 'FROZEN' ? 'Unfreeze' : 'Freeze'}
           </button>
           <button onClick={onDelete} disabled={!activeCard}
-            className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition-all text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-center ${activeCard ? 'bg-[#0B0E14] hover:bg-red-500/10 border-gray-800 text-gray-400 hover:text-red-400 cursor-pointer' : 'bg-[#0B0E14]/40 border-gray-900 text-gray-700 opacity-50 cursor-not-allowed'}`}>
+            className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition-all text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-center ${activeCard ? 'bg-[var(--bg-base)] hover:bg-red-500/10 border-[var(--border)] text-gray-400 hover:text-red-400 cursor-pointer' : 'bg-[var(--bg-base)]/40 border-[var(--border)] text-[var(--text-muted)] opacity-40 cursor-not-allowed'}`}>
             <Trash2 className="w-4 h-4 sm:w-[16px] sm:h-[16px]" color={activeCard ? '#f87171' : 'currentColor'} />
             Delete
           </button>
@@ -185,13 +185,13 @@ const CardManager: React.FC<Props> = ({
       </div>
 
       {/* --- PRAWA KOLUMNA: SPENDING RULES --- */}
-      <div className="bg-[#161B22] border border-gray-800 rounded-3xl p-5 md:p-6 flex flex-col shadow-lg w-full overflow-hidden">
-        <h3 className="text-xs text-gray-400 font-bold mb-4 sm:mb-5 tracking-widest uppercase px-1">Spending Rules</h3>
+      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-5 md:p-6 flex flex-col shadow-lg w-full overflow-hidden">
+        <h3 className="text-xs text-[var(--text-secondary)] font-bold mb-4 sm:mb-5 tracking-widest uppercase px-1">Spending Rules</h3>
 
         <div className={`flex-1 flex flex-col ${isJunior ? 'justify-center pb-6' : ''} gap-4 sm:gap-5`}>
 
           {/* CARD LIMITS */}
-          <div className="bg-[#0B0E14] rounded-2xl p-4 sm:p-5 border border-gray-800 shadow-inner w-full">
+          <div className="bg-[var(--bg-base)] rounded-2xl p-4 sm:p-5 border border-[var(--border)] shadow-inner w-full">
             <div className="flex justify-between items-center mb-4">
               <p className={`text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] px-1 ${isJunior ? 'text-purple-400' : 'text-emerald-400'}`}>Card Limits</p>
               <button onClick={() => onSaveLimits('CARD')} disabled={isSavingLimits}
@@ -206,17 +206,17 @@ const CardManager: React.FC<Props> = ({
 
             <div className="grid grid-cols-[repeat(auto-fit,minmax(130px,1fr))] gap-3 sm:gap-4 w-full">
               <div className="w-full">
-                <label className="text-[8px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block px-1 truncate">Per Transaction</label>
-                <div className="flex items-center bg-[#161B22] border border-gray-700 rounded-xl px-3 py-2 focus-within:border-white transition-colors w-full">
-                  <span className="text-gray-500 font-bold mr-2 text-xs sm:text-sm">£</span>
-                  <input type="number" value={txLimit} onChange={e => setTxLimit(e.target.value)} className="w-full bg-transparent text-white font-bold text-xs sm:text-sm outline-none" />
+                <label className="text-[8px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1.5 block px-1 truncate">Per Transaction</label>
+                <div className="flex items-center bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl px-3 py-2 focus-within:border-[var(--text-secondary)] transition-colors w-full">
+                  <span className="text-[var(--text-muted)] font-bold mr-2 text-xs sm:text-sm">£</span>
+                  <input type="number" value={txLimit} onChange={e => setTxLimit(e.target.value)} className="w-full bg-transparent text-[var(--text-primary)] font-bold text-xs sm:text-sm outline-none" />
                 </div>
               </div>
               <div className="w-full">
-                <label className="text-[8px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block px-1 truncate">Daily Limit</label>
-                <div className="flex items-center bg-[#161B22] border border-gray-700 rounded-xl px-3 py-2 focus-within:border-white transition-colors w-full">
-                  <span className="text-gray-500 font-bold mr-2 text-xs sm:text-sm">£</span>
-                  <input type="number" value={dailyLimit} onChange={e => setDailyLimit(e.target.value)} className="w-full bg-transparent text-white font-bold text-xs sm:text-sm outline-none" />
+                <label className="text-[8px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1.5 block px-1 truncate">Daily Limit</label>
+                <div className="flex items-center bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl px-3 py-2 focus-within:border-[var(--text-secondary)] transition-colors w-full">
+                  <span className="text-[var(--text-muted)] font-bold mr-2 text-xs sm:text-sm">£</span>
+                  <input type="number" value={dailyLimit} onChange={e => setDailyLimit(e.target.value)} className="w-full bg-transparent text-[var(--text-primary)] font-bold text-xs sm:text-sm outline-none" />
                 </div>
               </div>
             </div>
@@ -224,7 +224,7 @@ const CardManager: React.FC<Props> = ({
 
           {/* BLIK LIMITS */}
           {!isJunior && (
-            <div className="bg-[#0B0E14] rounded-2xl p-4 sm:p-5 border border-gray-800 border-dashed w-full">
+            <div className="bg-[var(--bg-base)] rounded-2xl p-4 sm:p-5 border border-[var(--border)] border-dashed w-full">
               <div className="flex justify-between items-center mb-4">
                 <p className="text-[9px] sm:text-[10px] text-emerald-400 font-black uppercase tracking-[0.2em] px-1">BLIK Limits</p>
                 <button onClick={() => onSaveLimits('BLIK')} disabled={isSavingLimits}
@@ -235,17 +235,17 @@ const CardManager: React.FC<Props> = ({
 
               <div className="grid grid-cols-[repeat(auto-fit,minmax(130px,1fr))] gap-3 sm:gap-4 w-full">
                 <div className="w-full">
-                  <label className="text-[8px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block px-1 truncate">Per Transaction</label>
-                  <div className="flex items-center bg-[#161B22] border border-gray-700 rounded-xl px-3 py-2 focus-within:border-emerald-500 transition-colors w-full">
-                    <span className="text-gray-500 font-bold mr-2 text-xs sm:text-sm">£</span>
-                    <input type="number" value={blikTxLimit} onChange={e => setBlikTxLimit(e.target.value)} className="w-full bg-transparent text-white font-bold text-xs sm:text-sm outline-none" />
+                  <label className="text-[8px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1.5 block px-1 truncate">Per Transaction</label>
+                  <div className="flex items-center bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl px-3 py-2 focus-within:border-emerald-500 transition-colors w-full">
+                    <span className="text-[var(--text-muted)] font-bold mr-2 text-xs sm:text-sm">£</span>
+                    <input type="number" value={blikTxLimit} onChange={e => setBlikTxLimit(e.target.value)} className="w-full bg-transparent text-[var(--text-primary)] font-bold text-xs sm:text-sm outline-none" />
                   </div>
                 </div>
                 <div className="w-full">
-                  <label className="text-[8px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block px-1 truncate">Daily Limit</label>
-                  <div className="flex items-center bg-[#161B22] border border-gray-700 rounded-xl px-3 py-2 focus-within:border-emerald-500 transition-colors w-full">
-                    <span className="text-gray-500 font-bold mr-2 text-xs sm:text-sm">£</span>
-                    <input type="number" value={blikDailyLimit} onChange={e => setBlikDailyLimit(e.target.value)} className="w-full bg-transparent text-white font-bold text-xs sm:text-sm outline-none" />
+                  <label className="text-[8px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1.5 block px-1 truncate">Daily Limit</label>
+                  <div className="flex items-center bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl px-3 py-2 focus-within:border-emerald-500 transition-colors w-full">
+                    <span className="text-[var(--text-muted)] font-bold mr-2 text-xs sm:text-sm">£</span>
+                    <input type="number" value={blikDailyLimit} onChange={e => setBlikDailyLimit(e.target.value)} className="w-full bg-transparent text-[var(--text-primary)] font-bold text-xs sm:text-sm outline-none" />
                   </div>
                 </div>
               </div>
@@ -257,7 +257,7 @@ const CardManager: React.FC<Props> = ({
               <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-purple-500/10 mb-3 sm:mb-4 border border-purple-500/20">
                 <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
               </div>
-              <h4 className="text-[9px] sm:text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Secure Account</h4>
+              <h4 className="text-[9px] sm:text-[10px] text-[var(--text-secondary)] font-black uppercase tracking-widest mb-2">Secure Account</h4>
               <p className="text-[9px] sm:text-[10px] text-gray-600 leading-relaxed max-w-[260px] mx-auto">
                 Prepaid limits guarantee controlled spending. BLIK and credit services are disabled.
               </p>

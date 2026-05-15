@@ -78,11 +78,11 @@ const Dashboard = () => {
                 <div className="max-w-6xl mx-auto space-y-6">
 
                     {/* SEKCJA 1: GŁÓWNE PODSUMOWANIE */}
-                    <section className="bg-[#161B22] border border-gray-800 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-lg">
+                    <section className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-lg">
                         <div>
                             <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Total Balance</p>
-                            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white">{formattedTotalBalance}</h1>
-                            <p className="text-gray-500 text-sm mt-3">
+                            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-[var(--text-primary)]">{formattedTotalBalance}</h1>
+                            <p className="text-[var(--text-muted)] text-sm mt-3">
                                 Across {accountCount} account{accountCount !== 1 ? 's' : ''} · Updated just now
                             </p>
                         </div>
@@ -95,7 +95,7 @@ const Dashboard = () => {
                             </button>
                             <button
                                 onClick={() => setIsAddMoneyOpen(true)}
-                                className="flex-1 md:flex-none border border-gray-700 hover:bg-gray-800 text-white px-6 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors"
+                                className="flex-1 md:flex-none border border-[var(--border)] hover:bg-[var(--bg-elevated)] text-[var(--text-primary)] px-6 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors"
                             >
                                 <Plus size={18} /> Add money
                             </button>
@@ -114,7 +114,7 @@ const Dashboard = () => {
                                     key={account.id}
                                     // DODAJEMY ONCLICK TUTAJ: Przenosi do /accounts i przekazuje ID konta
                                     onClick={() => navigate('/accounts', { state: { selectedAccountId: account.id } })}
-                                    className="bg-[#161B22] border border-gray-800 rounded-3xl p-6 cursor-pointer hover:border-gray-600 transition-all group relative overflow-hidden"
+                                    className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-6 cursor-pointer hover:border-gray-600 transition-all group relative overflow-hidden"
                                 >
                                     <div className={`absolute -top-10 -right-10 w-24 h-24 blur-3xl opacity-10 ${isCurrent ? 'bg-emerald-500' : 'bg-purple-500'}`}></div>
 
@@ -123,7 +123,7 @@ const Dashboard = () => {
                                             <Home size={24} />
                                         </div>
                                         {/* Strzałka sugerująca klikalność - można ją oprogramować do navigate('/accounts') */}
-                                        <ChevronRight size={20} className="text-gray-600 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                                        <ChevronRight size={20} className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] group-hover:translate-x-1 transition-all" />
                                     </div>
 
                                     <div className="space-y-1">
@@ -139,7 +139,7 @@ const Dashboard = () => {
                                                 {account.owner_first_name || (isCurrent ? 'MAIN' : 'JUNIOR')}
                                             </span>
                                         </div>
-                                        <h2 className="text-3xl font-black text-white tracking-tight">
+                                        <h2 className="text-3xl font-black text-[var(--text-primary)] tracking-tight">
                                             {new Intl.NumberFormat('en-GB', {
                                                 style: 'currency',
                                                 currency: account.currency || 'GBP'
@@ -147,8 +147,8 @@ const Dashboard = () => {
                                         </h2>
                                     </div>
 
-                                    <div className="mt-6 pt-4 border-t border-gray-800/50">
-                                        <p className="text-gray-500 text-[11px] font-mono tracking-[0.15em] uppercase opacity-70 group-hover:opacity-100 transition-opacity">
+                                    <div className="mt-6 pt-4 border-t border-[var(--border)]/50">
+                                        <p className="text-[var(--text-muted)] text-[11px] font-mono tracking-[0.15em] uppercase opacity-70 group-hover:opacity-100 transition-opacity">
                                             {formattedIban}
                                         </p>
                                     </div>
@@ -159,22 +159,22 @@ const Dashboard = () => {
                         {/* DODAJ KONTO JUNIOR */}
                         <button
                             onClick={() => setIsAddJuniorOpen(true)}
-                            className="bg-transparent border-2 border-dashed border-gray-700 hover:border-[#00FF85] hover:bg-[#00FF85]/5 rounded-3xl p-6 flex flex-col items-center justify-center text-gray-500 hover:text-[#00FF85] transition-all min-h-[180px] group"
+                            className="bg-transparent border-2 border-dashed border-[var(--border)] hover:border-[#00FF85] hover:bg-[#00FF85]/5 rounded-3xl p-6 flex flex-col items-center justify-center text-gray-500 hover:text-[#00FF85] transition-all min-h-[180px] group"
                         >
-                            <div className="w-12 h-12 bg-gray-800 group-hover:bg-[#00FF85]/20 rounded-full flex items-center justify-center mb-3 transition-colors">
-                                <Plus size={24} className="text-gray-400 group-hover:text-[#00FF85] transition-colors" />
+                            <div className="w-12 h-12 bg-[var(--bg-elevated)] group-hover:bg-[#00FF85]/20 rounded-full flex items-center justify-center mb-3 transition-colors">
+                                <Plus size={24} className="text-[var(--text-muted)] group-hover:text-[#00FF85] transition-colors" />
                             </div>
                             <span className="font-semibold text-sm">Add Junior Account</span>
                         </button>
                     </section>
 
                     {/* SEKCJA 3: TRANSAKCJE */}
-                    <section className="bg-[#161B22] border border-gray-800 rounded-3xl p-6">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b border-gray-800 pb-6">
-                            <div className="flex bg-[#0B0E14] p-1 rounded-xl w-full sm:w-auto overflow-x-auto no-scrollbar">
-                                <button className="px-6 py-2 bg-[#1F262E] text-white rounded-lg text-sm font-medium shadow-sm whitespace-nowrap">All</button>
-                                <button className="px-6 py-2 text-gray-500 hover:text-gray-300 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">Money in</button>
-                                <button className="px-6 py-2 text-gray-500 hover:text-gray-300 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">Money out</button>
+                    <section className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-6">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b border-[var(--border)] pb-6">
+                            <div className="flex bg-[var(--bg-base)] p-1 rounded-xl w-full sm:w-auto overflow-x-auto no-scrollbar">
+                                <button className="px-6 py-2 bg-[var(--bg-elevated)] text-[var(--text-primary)] rounded-lg text-sm font-medium shadow-sm whitespace-nowrap">All</button>
+                                <button className="px-6 py-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded-lg text-sm font-medium transition-colors whitespace-nowrap">Money in</button>
+                                <button className="px-6 py-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded-lg text-sm font-medium transition-colors whitespace-nowrap">Money out</button>
                             </div>
                             <button className="text-[#00FF85] hover:text-[#00e074] text-sm font-bold flex items-center gap-2 transition-colors whitespace-nowrap">
                                 <Download size={16} /> Download

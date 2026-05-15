@@ -44,7 +44,7 @@ const TopUpModal: React.FC<TopUpModalProps> = ({ isOpen, onClose, cardId, onSucc
 
     return (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-[#161B22] border border-gray-800 w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="bg-[var(--bg-surface)] border border-[var(--border)] w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-200">
 
                 <div className="flex justify-between items-center mb-8">
                     <div className="flex items-center gap-3">
@@ -52,7 +52,7 @@ const TopUpModal: React.FC<TopUpModalProps> = ({ isOpen, onClose, cardId, onSucc
                             <CreditCard className="text-[#00FF85]" size={20} />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-white tracking-tight">Top Up Card</h2>
+                            <h2 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">Top Up Card</h2>
                             <p className="text-gray-500 text-xs mt-0.5">Transfer from main balance</p>
                         </div>
                     </div>
@@ -68,24 +68,24 @@ const TopUpModal: React.FC<TopUpModalProps> = ({ isOpen, onClose, cardId, onSucc
                 )}
 
                 <div className="mb-8">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 block ml-1">Amount</label>
+                    <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-3 block ml-1">Amount</label>
                     <div className="relative group">
                         <span className="absolute left-6 top-1/2 -translate-y-1/2 text-4xl font-bold text-[#00FF85]">£</span>
                         <input
                             type="number"
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
-                            className="w-full bg-[#0B0E14] border border-gray-800 rounded-2xl p-6 pl-14 text-4xl font-bold text-white focus:outline-none focus:border-[#00FF85]/50 transition-all placeholder:text-gray-700/40"
+                            className="w-full bg-[var(--bg-base)] border border-[var(--border)] rounded-2xl p-6 pl-14 text-4xl font-bold text-[var(--text-primary)] focus:outline-none focus:border-[#00FF85]/50 transition-all placeholder:text-[var(--text-muted)]/50"
                             placeholder="0.00"
                         />
                     </div>
                 </div>
 
                 <div className="mb-8">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 block ml-1">Quick Add</label>
+                    <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-3 block ml-1">Quick Add</label>
                     <div className="grid grid-cols-3 gap-3">
                         {[10, 50, 100].map(val => (
-                            <button key={val} onClick={() => handleQuickAdd(val)} className="bg-[#1F262E] hover:bg-[#2a343f] text-white py-3 rounded-xl font-bold text-sm transition-all active:scale-95 border border-gray-800">
+                            <button key={val} onClick={() => handleQuickAdd(val)} className="bg-[var(--bg-elevated)] hover:bg-[#2a343f] text-white py-3 rounded-xl font-bold text-sm transition-all active:scale-95 border border-[var(--border)]">
                                 +£{val}
                             </button>
                         ))}
