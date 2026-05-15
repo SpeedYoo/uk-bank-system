@@ -7,6 +7,7 @@ import JuniorRoute from './components/JuniorRoute';
 import Dashboard from './pages/Dashboard';
 import Accounts from './pages/Accounts';
 import Settings from './pages/Settings';
+import Profile from './pages/Profile';
 import JuniorDashboard from './pages/JuniorDashboard';
 import PublicRoute from './components/PublicRoute';
 import Layout from './components/Layout';
@@ -56,6 +57,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/accounts" element={<Accounts />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/profile" element={<Profile />} />
           </Route>
         </Route>
         

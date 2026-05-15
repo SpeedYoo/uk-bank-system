@@ -56,14 +56,14 @@ const Header: React.FC<HeaderProps> = ({
                 </div>
 
                 <button
-                    onClick={() => navigate('/settings')}
+                    onClick={() => navigate('/profile')}
                     className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-all hover:ring-2 hover:ring-emerald-500/50"
                     style={{
                         backgroundColor: 'var(--bg-elevated)',
                         color: 'var(--text-primary)',
                         border: '1px solid var(--border)',
                     }}
-                    title="Settings"
+                    title="Profile"
                 >
                     {initials}
                 </button>
