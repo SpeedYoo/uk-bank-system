@@ -25,12 +25,15 @@ const Login = () => {
                 password: password,
             });
 
-            const { access, refresh, is_setup_complete } = response.data;
+            const { access, refresh, is_setup_complete, is_junior } = response.data;
 
             localStorage.setItem('access_token', access);
             localStorage.setItem('refresh_token', refresh);
+            localStorage.setItem('is_junior', is_junior ? 'true' : 'false');
 
-            if (is_setup_complete) {
+            if (is_junior) {
+                navigate('/junior/dashboard', { replace: true });
+            } else if (is_setup_complete) {
                 navigate('/dashboard', { replace: true });
             } else {
                 navigate('/setup', { replace: true });

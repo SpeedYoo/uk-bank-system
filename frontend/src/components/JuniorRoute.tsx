@@ -1,13 +1,13 @@
 import { Navigate, Outlet } from 'react-router-dom';
 
-const ProtectedRoute = () => {
+const JuniorRoute = () => {
     const token = localStorage.getItem('access_token');
     const isJunior = localStorage.getItem('is_junior') === 'true';
 
     if (!token) return <Navigate to="/login" replace />;
-    if (isJunior) return <Navigate to="/junior/dashboard" replace />;
+    if (!isJunior) return <Navigate to="/dashboard" replace />;
 
     return <Outlet />;
 };
 
-export default ProtectedRoute;
+export default JuniorRoute;
