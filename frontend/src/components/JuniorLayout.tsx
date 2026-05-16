@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate, NavLink, Link } from 'react-router-dom';
-import { LogOut, Star, LayoutDashboard, Send, Clock, UserCircle } from 'lucide-react';
+import { LogOut, Star, LayoutDashboard, Send, Clock, BarChart2 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import api from '../api/axios';
 
@@ -35,8 +35,9 @@ const JuniorLayout = () => {
 
     const navItems = [
         { to: '/junior/dashboard', icon: <LayoutDashboard size={20} />, label: 'Home' },
-        { to: '/junior/payments', icon: <Send size={20} />, label: 'Payments' },
-        { to: '/junior/history', icon: <Clock size={20} />, label: 'History' },
+        { to: '/junior/payments',  icon: <Send size={20} />,            label: 'Payments' },
+        { to: '/junior/history',   icon: <Clock size={20} />,           label: 'History' },
+        { to: '/junior/analytics', icon: <BarChart2 size={20} />,       label: 'Analytics' },
     ];
 
     return (
@@ -87,7 +88,7 @@ const JuniorLayout = () => {
                         key={item.to}
                         to={item.to}
                         className={({ isActive }) =>
-                            `flex flex-col items-center gap-1 px-6 py-2 rounded-2xl transition-all text-xs font-bold ${isActive
+                            `flex flex-col items-center gap-1 flex-1 py-2 rounded-2xl transition-all text-xs font-bold ${isActive
                                 ? 'text-purple-600 bg-purple-100'
                                 : 'text-purple-300 hover:text-purple-500'
                             }`
