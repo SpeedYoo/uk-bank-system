@@ -36,7 +36,6 @@ const JuniorLayout = () => {
         { to: '/junior/dashboard', icon: <LayoutDashboard size={20} />, label: 'Home' },
         { to: '/junior/payments', icon: <Send size={20} />, label: 'Payments' },
         { to: '/junior/history', icon: <Clock size={20} />, label: 'History' },
-        { to: '/junior/profile', icon: <UserCircle size={20} />, label: 'Profile' },
     ];
 
     return (
