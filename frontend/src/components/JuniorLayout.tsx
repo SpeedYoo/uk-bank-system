@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate, useLocation, NavLink } from 'react-router-dom';
-import { LogOut, Star, Bell, LayoutDashboard, Send } from 'lucide-react';
+import { LogOut, Star, Bell, LayoutDashboard, Send, Clock } from 'lucide-react';
 import api from '../api/axios';
 
 const JuniorLayout = () => {
@@ -35,6 +35,7 @@ const JuniorLayout = () => {
     const navItems = [
         { to: '/junior/dashboard', icon: <LayoutDashboard size={20} />, label: 'Home' },
         { to: '/junior/payments', icon: <Send size={20} />, label: 'Payments' },
+        { to: '/junior/history', icon: <Clock size={20} />, label: 'History' },
     ];
 
     return (
