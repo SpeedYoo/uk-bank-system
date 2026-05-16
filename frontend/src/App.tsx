@@ -13,6 +13,7 @@ import Profile from './pages/Profile';
 import Payments from './pages/Payments';
 import Analytics from './pages/Analytics';
 import JuniorDashboard from './pages/JuniorDashboard';
+import JuniorPayments from './pages/JuniorPayments';
 import PublicRoute from './components/PublicRoute';
 import Layout from './components/Layout';
 import JuniorLayout from './components/JuniorLayout';
@@ -73,6 +74,7 @@ function App() {
         <Route element={<JuniorRoute />}>
           <Route element={<JuniorLayout />}>
             <Route path="/junior/dashboard" element={<JuniorDashboard />} />
+            <Route path="/junior/payments" element={<JuniorPayments />} />
           </Route>
         </Route>
 
