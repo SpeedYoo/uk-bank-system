@@ -16,6 +16,7 @@ import JuniorDashboard from './pages/JuniorDashboard';
 import JuniorPayments from './pages/JuniorPayments';
 import JuniorHistory from './pages/JuniorHistory';
 import JuniorProfile from './pages/JuniorProfile';
+import JuniorAnalytics from './pages/JuniorAnalytics';
 import PublicRoute from './components/PublicRoute';
 import Layout from './components/Layout';
 import JuniorLayout from './components/JuniorLayout';
@@ -78,7 +79,8 @@ function App() {
             <Route path="/junior/dashboard" element={<JuniorDashboard />} />
             <Route path="/junior/payments" element={<JuniorPayments />} />
             <Route path="/junior/history" element={<JuniorHistory />} />
-            <Route path="/junior/profile" element={<JuniorProfile />} />
+            <Route path="/junior/profile"   element={<JuniorProfile />} />
+            <Route path="/junior/analytics" element={<JuniorAnalytics />} />
           </Route>
         </Route>
 
