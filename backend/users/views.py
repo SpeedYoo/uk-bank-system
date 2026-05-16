@@ -20,6 +20,49 @@ class CustomLoginView(TokenObtainPairView):
     serializer_class = CustomLoginSerializer
 
 
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request):
+        old_password = request.data.get('old_password', '')
+        new_password = request.data.get('new_password', '')
+        confirm_password = request.data.get('confirm_password', '')
+
+        if not request.user.check_password(old_password):
+            return Response({"error": "Current password is incorrect."}, status=status.HTTP_400_BAD_REQUEST)
+        if len(new_password) < 8:
+            return Response({"error": "New password must be at least 8 characters."}, status=status.HTTP_400_BAD_REQUEST)
+        if new_password != confirm_password:
+            return Response({"error": "Passwords do not match."}, status=status.HTTP_400_BAD_REQUEST)
+        if old_password == new_password:
+            return Response({"error": "New password must differ from the current one."}, status=status.HTTP_400_BAD_REQUEST)
+
+        request.user.set_password(new_password)
+        request.user.save()
+        return Response({"message": "Password changed successfully."})
+
+
+class ChangeEmailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request):
+        new_email = request.data.get('new_email', '').lower().strip()
+        password = request.data.get('password', '')
+
+        if not new_email:
+            return Response({"error": "New email is required."}, status=status.HTTP_400_BAD_REQUEST)
+        if not request.user.check_password(password):
+            return Response({"error": "Password is incorrect."}, status=status.HTTP_400_BAD_REQUEST)
+        if new_email == request.user.email:
+            return Response({"error": "This is already your current email."}, status=status.HTTP_400_BAD_REQUEST)
+        if User.objects.filter(email=new_email).exists():
+            return Response({"error": "This email is already in use."}, status=status.HTTP_400_BAD_REQUEST)
+
+        request.user.email = new_email
+        request.user.save()
+        return Response({"message": "Email changed successfully."})
+
+
 class CreateJuniorUserView(APIView):
     permission_classes = [IsAuthenticated]
 
