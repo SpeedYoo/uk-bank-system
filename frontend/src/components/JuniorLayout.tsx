@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Outlet, useNavigate, useLocation, NavLink } from 'react-router-dom';
-import { LogOut, Star, Bell, LayoutDashboard, Send, Clock } from 'lucide-react';
+import { Outlet, useNavigate, NavLink, Link } from 'react-router-dom';
+import { LogOut, Star, Bell, LayoutDashboard, Send, Clock, UserCircle } from 'lucide-react';
 import api from '../api/axios';
 
 const JuniorLayout = () => {
@@ -36,6 +36,7 @@ const JuniorLayout = () => {
         { to: '/junior/dashboard', icon: <LayoutDashboard size={20} />, label: 'Home' },
         { to: '/junior/payments', icon: <Send size={20} />, label: 'Payments' },
         { to: '/junior/history', icon: <Clock size={20} />, label: 'History' },
+        { to: '/junior/profile', icon: <UserCircle size={20} />, label: 'Profile' },
     ];
 
     return (
@@ -58,9 +59,13 @@ const JuniorLayout = () => {
                         <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-pink-500 border-2 border-white rounded-full"></span>
                     </div>
 
-                    <div className="w-9 h-9 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-xs font-black text-white shadow">
+                    <Link
+                        to="/junior/profile"
+                        title="View profile"
+                        className="w-9 h-9 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-xs font-black text-white shadow hover:opacity-80 transition-opacity"
+                    >
                         {initials}
-                    </div>
+                    </Link>
 
                     <button
                         onClick={handleLogout}
