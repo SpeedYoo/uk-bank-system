@@ -8,9 +8,10 @@ interface TransferModalProps {
     accounts: any[];
     onSuccess: () => void;
     prefilled?: { recipientName: string; recipientAccount: string; routingMethod: string } | null;
+    disableAccountTypeFilter?: boolean;
 }
 
-const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, accounts, onSuccess, prefilled }) => {
+const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, accounts, onSuccess, prefilled, disableAccountTypeFilter = false }) => {
     const [activeTab, setActiveTab] = useState<'EXTERNAL' | 'OWN'>('EXTERNAL');
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -36,7 +37,7 @@ const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, accounts
         });
     };
 
-    const availableFromAccounts = activeTab === 'EXTERNAL'
+    const availableFromAccounts = (activeTab === 'EXTERNAL' && !disableAccountTypeFilter)
         ? accounts.filter(acc => acc.account_type === 'CURRENT')
         : accounts;
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
-import { LogOut, Star, Bell } from 'lucide-react';
+import { Outlet, useNavigate, useLocation, NavLink } from 'react-router-dom';
+import { LogOut, Star, Bell, LayoutDashboard, Send } from 'lucide-react';
 import api from '../api/axios';
 
 const JuniorLayout = () => {
@@ -31,6 +31,11 @@ const JuniorLayout = () => {
     };
 
     const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || '?';
+
+    const navItems = [
+        { to: '/junior/dashboard', icon: <LayoutDashboard size={20} />, label: 'Home' },
+        { to: '/junior/payments', icon: <Send size={20} />, label: 'Payments' },
+    ];
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-violet-100 via-purple-50 to-blue-100 font-sans">
@@ -66,9 +71,29 @@ const JuniorLayout = () => {
                 </div>
             </header>
 
-            <main className="max-w-2xl mx-auto px-4 py-8">
+            <main className="max-w-2xl mx-auto px-4 py-8 pb-28">
                 <Outlet context={{ firstName, lastName }} />
             </main>
+
+            {/* Bottom tab navigation */}
+            <nav className="fixed bottom-0 left-0 right-0 z-10 bg-white/80 backdrop-blur-md border-t border-purple-200 flex justify-around items-stretch px-4 py-2 safe-area-inset-bottom">
+                {navItems.map(item => (
+                    <NavLink
+                        key={item.to}
+                        to={item.to}
+                        className={({ isActive }) =>
+                            `flex flex-col items-center gap-1 px-6 py-2 rounded-2xl transition-all text-xs font-bold ${
+                                isActive
+                                    ? 'text-purple-600 bg-purple-100'
+                                    : 'text-purple-300 hover:text-purple-500'
+                            }`
+                        }
+                    >
+                        {item.icon}
+                        {item.label}
+                    </NavLink>
+                ))}
+            </nav>
         </div>
     );
 };
