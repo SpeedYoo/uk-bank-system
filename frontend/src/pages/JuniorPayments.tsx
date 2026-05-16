@@ -305,6 +305,7 @@ const JuniorPayments: React.FC = () => {
                 onSuccess={() => { setIsTransferOpen(false); setPrefilled(null); fetchAll(true); }}
                 prefilled={prefilled}
                 disableAccountTypeFilter={true}
+                juniorTheme={true}
             />
         </>
     );
