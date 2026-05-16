@@ -25,7 +25,7 @@ const JuniorLayout = () => {
         try {
             const refreshToken = localStorage.getItem('refresh_token');
             await api.post('/auth/logout/', { refresh: refreshToken });
-        } catch {}
+        } catch { }
         localStorage.clear();
         navigate('/login', { replace: true });
     };
@@ -42,15 +42,17 @@ const JuniorLayout = () => {
         <div className="min-h-screen bg-gradient-to-br from-violet-100 via-purple-50 to-blue-100 font-sans">
             {/* Top bar */}
             <header className="bg-white/70 backdrop-blur-md border-b border-purple-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
-                        <Star size={20} className="text-white fill-white" />
+                <Link to="/junior/dashboard">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                            <Star size={20} className="text-white fill-white" />
+                        </div>
+                        <div>
+                            <span className="text-lg font-black text-purple-700 tracking-tight">Lyo Jr.</span>
+                            <p className="text-[10px] text-purple-400 font-bold uppercase tracking-widest leading-none">Junior Account</p>
+                        </div>
                     </div>
-                    <div>
-                        <span className="text-lg font-black text-purple-700 tracking-tight">Lyo Jr.</span>
-                        <p className="text-[10px] text-purple-400 font-bold uppercase tracking-widest leading-none">Junior Account</p>
-                    </div>
-                </div>
+                </Link>
 
                 <div className="flex items-center gap-4">
                     <div className="relative cursor-pointer">
@@ -87,10 +89,9 @@ const JuniorLayout = () => {
                         key={item.to}
                         to={item.to}
                         className={({ isActive }) =>
-                            `flex flex-col items-center gap-1 px-6 py-2 rounded-2xl transition-all text-xs font-bold ${
-                                isActive
-                                    ? 'text-purple-600 bg-purple-100'
-                                    : 'text-purple-300 hover:text-purple-500'
+                            `flex flex-col items-center gap-1 px-6 py-2 rounded-2xl transition-all text-xs font-bold ${isActive
+                                ? 'text-purple-600 bg-purple-100'
+                                : 'text-purple-300 hover:text-purple-500'
                             }`
                         }
                     >
