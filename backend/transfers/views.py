@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -6,7 +7,7 @@ from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 
 from accounts.models import Account
-from .models import Transfer, SavedRecipient
+from .models import Transfer, SavedRecipient, JuniorApproval
 from transactions.models import Transaction
 from django.db.models import Q
 from decimal import Decimal
@@ -183,7 +184,34 @@ class NationalTransferView(APIView):
             source_acc = Account.objects.get(id=from_id, customer__user=request.user)
 
             if source_acc.account_type == 'JUNIOR':
-                return Response({"error": "Junior accounts cannot transfer outside"}, status=403)
+                # Create a pending approval request for the parent instead of blocking
+                try:
+                    junior_customer = source_acc.customer
+                    parent_customer = junior_customer.parent_customer
+                    if not parent_customer or not parent_customer.user:
+                        return Response({"error": "No parent account linked to approve transfers."}, status=400)
+                    parent_user = parent_customer.user
+                except Exception:
+                    return Response({"error": "Could not locate parent account."}, status=400)
+
+                approval = JuniorApproval.objects.create(
+                    junior_user=request.user,
+                    parent_user=parent_user,
+                    from_account=source_acc,
+                    recipient_name=data.get('recipient_name', ''),
+                    recipient_account=recipient_account,
+                    swift_bic=data.get('swift_bic') or None,
+                    amount=amount,
+                    title=data.get('title', 'Transfer'),
+                    routing_method=data.get('routing_method', 'FPS'),
+                )
+
+                notify(parent_user, 'Transfer approval needed',
+                       f'{junior_customer.first_name} wants to send £{amount} to {data.get("recipient_name", "")}. Review it in Payments.')
+                notify(request.user, 'Transfer sent for approval',
+                       f'Your transfer of £{amount} to {data.get("recipient_name", "")} is waiting for your parent to approve.')
+
+                return Response({"status": "pending_approval", "approval_id": approval.id}, status=202)
 
             if source_acc.balance < amount:
                 return Response({"error": "Insufficient funds"}, status=400)
@@ -239,3 +267,141 @@ class NationalTransferView(APIView):
             return Response({"error": "Source account not found"}, status=404)
         except Exception as e:
             return Response({"error": str(e)}, status=400)
+
+
+class JuniorApprovalListView(APIView):
+    """GET /api/junior/approvals/ — pending approvals for the authenticated parent."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        approvals = JuniorApproval.objects.filter(
+            parent_user=request.user,
+            status='PENDING',
+        )
+        data = [
+            {
+                'id':               a.id,
+                'junior_name':      f"{a.from_account.customer.first_name} {a.from_account.customer.last_name}",
+                'from_account':     a.from_account.account_number,
+                'recipient_name':   a.recipient_name,
+                'recipient_account': a.recipient_account,
+                'amount':           str(a.amount),
+                'title':            a.title,
+                'routing_method':   a.routing_method,
+                'created_at':       a.created_at.isoformat(),
+            }
+            for a in approvals
+        ]
+        return Response(data)
+
+
+class JuniorMyApprovalsView(APIView):
+    """GET /api/junior/my-approvals/ — own pending approvals visible to the junior."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        approvals = JuniorApproval.objects.filter(
+            junior_user=request.user,
+            status='PENDING',
+        )
+        data = [
+            {
+                'id':               a.id,
+                'recipient_name':   a.recipient_name,
+                'recipient_account': a.recipient_account,
+                'amount':           str(a.amount),
+                'title':            a.title,
+                'routing_method':   a.routing_method,
+                'created_at':       a.created_at.isoformat(),
+            }
+            for a in approvals
+        ]
+        return Response(data)
+
+
+class JuniorApprovalDecideView(APIView):
+    """POST /api/junior/approvals/{id}/decide/ — approve or reject as parent."""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        action = request.data.get('action')  # 'approve' | 'reject'
+        if action not in ('approve', 'reject'):
+            return Response({'error': 'action must be "approve" or "reject"'}, status=400)
+
+        try:
+            approval = JuniorApproval.objects.get(pk=pk, parent_user=request.user, status='PENDING')
+        except JuniorApproval.DoesNotExist:
+            return Response({'error': 'Approval not found or already decided.'}, status=404)
+
+        if action == 'reject':
+            approval.status = 'REJECTED'
+            approval.decided_at = timezone.now()
+            approval.save()
+            notify(approval.junior_user, 'Transfer rejected',
+                   f'Your transfer of £{approval.amount} to {approval.recipient_name} was rejected.')
+            return Response({'status': 'rejected'})
+
+        # ── APPROVE ──────────────────────────────────────────────────────
+        source_acc = approval.from_account
+        if source_acc.balance < approval.amount:
+            return Response({'error': 'Junior account has insufficient funds.'}, status=400)
+
+        with transaction.atomic():
+            transfer = Transfer.objects.create(
+                user=approval.junior_user,
+                from_account=source_acc,
+                recipient_name=approval.recipient_name,
+                recipient_account=approval.recipient_account,
+                swift_bic=approval.swift_bic,
+                amount=approval.amount,
+                title=approval.title,
+                routing_method=approval.routing_method,
+                status='COMPLETED',
+            )
+
+            source_acc.balance -= approval.amount
+            source_acc.save()
+
+            Transaction.objects.create(
+                user=approval.junior_user,
+                account=source_acc,
+                transfer=transfer,
+                amount=-approval.amount,
+                title=approval.title,
+                balance_after=source_acc.balance,
+            )
+
+            # Credit target if internal (same bank)
+            target_acc = Account.objects.filter(iban=approval.recipient_account).first()
+            if target_acc:
+                target_acc.balance += approval.amount
+                target_acc.save()
+                try:
+                    recipient_user = (
+                        target_acc.customer.user
+                        or target_acc.customer.parent_customer.user
+                    )
+                    if recipient_user:
+                        Transaction.objects.create(
+                            user=recipient_user,
+                            account=target_acc,
+                            transfer=transfer,
+                            amount=approval.amount,
+                            title=approval.title,
+                            balance_after=target_acc.balance,
+                        )
+                        notify(recipient_user, 'Money received',
+                               f'You received £{approval.amount} from {source_acc.customer.first_name}.')
+                except Exception:
+                    pass
+
+            approval.status = 'APPROVED'
+            approval.decided_at = timezone.now()
+            approval.save()
+
+            notify(approval.junior_user, 'Transfer approved',
+                   f'Your transfer of £{approval.amount} to {approval.recipient_name} was approved and sent!')
+            notify(request.user, 'Transfer approved',
+                   f'You approved £{approval.amount} transfer for {source_acc.customer.first_name}.')
+
+        return Response({'status': 'approved'})

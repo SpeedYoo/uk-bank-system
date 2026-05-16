@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Send, Trash2, UserPlus, ChevronRight, Globe, Zap, Clock } from 'lucide-react';
+import { Send, Trash2, UserPlus, ChevronRight, Globe, Zap, Clock, CheckCircle2, XCircle, ShieldAlert } from 'lucide-react';
 import api from '../api/axios';
 import TransferModal from '../components/TransferModal';
 
@@ -20,6 +20,18 @@ interface Recipient {
     name: string;
     account: string;
     routing_method: string;
+}
+
+interface JuniorApproval {
+    id: number;
+    junior_name: string;
+    from_account: string;
+    recipient_name: string;
+    recipient_account: string;
+    amount: string;
+    title: string;
+    routing_method: string;
+    created_at: string;
 }
 
 const methodLabel: Record<string, string> = {
@@ -48,6 +60,8 @@ const Payments: React.FC = () => {
     const [accounts, setAccounts] = useState<any[]>([]);
     const [transfers, setTransfers] = useState<Transfer[]>([]);
     const [recipients, setRecipients] = useState<Recipient[]>([]);
+    const [approvals, setApprovals] = useState<JuniorApproval[]>([]);
+    const [decidingId, setDecidingId] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
     const [hasMore, setHasMore] = useState(false);
     const [page, setPage] = useState(1);
@@ -65,13 +79,15 @@ const Payments: React.FC = () => {
 
     const fetchAll = useCallback(async (resetPage = true) => {
         try {
-            const [accRes, recRes, txRes] = await Promise.all([
+            const [accRes, recRes, txRes, aprRes] = await Promise.all([
                 api.get('/accounts/'),
                 api.get('/recipients/'),
                 api.get('/transfers/', { params: { page: resetPage ? 1 : page } }),
+                api.get('/junior/approvals/').catch(() => ({ data: [] })),
             ]);
             setAccounts(accRes.data);
             setRecipients(recRes.data);
+            setApprovals(aprRes.data);
             if (resetPage) {
                 setTransfers(txRes.data.results);
                 setPage(1);
@@ -125,6 +141,18 @@ const Payments: React.FC = () => {
         setIsTransferOpen(true);
     };
 
+    const handleDecide = async (id: number, action: 'approve' | 'reject') => {
+        setDecidingId(id);
+        try {
+            await api.post(`/junior/approvals/${id}/decide/`, { action });
+            setApprovals(prev => prev.filter(a => a.id !== id));
+        } catch (err: any) {
+            alert(err.response?.data?.error || 'Something went wrong.');
+        } finally {
+            setDecidingId(null);
+        }
+    };
+
     const formatDate = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
     const formatTime = (iso: string) => new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     const formatIban = (iban: string) => iban.replace(/(.{4})/g, '$1 ').trim();
@@ -150,6 +178,68 @@ const Payments: React.FC = () => {
                             <Send size={16} /> Send money
                         </button>
                     </div>
+
+                    {/* ── Junior approval panel (parents only) ── */}
+                    {approvals.length > 0 && (
+                        <section className="rounded-3xl p-5 sm:p-6 border-2 border-amber-500/30" style={{ backgroundColor: 'var(--bg-surface)' }}>
+                            <div className="flex items-center gap-2 mb-4">
+                                <ShieldAlert size={16} className="text-amber-400 shrink-0" />
+                                <h2 className="text-[10px] font-bold uppercase tracking-widest text-amber-400">
+                                    Pending Junior Approvals ({approvals.length})
+                                </h2>
+                            </div>
+                            <div className="space-y-3">
+                                {approvals.map(a => (
+                                    <div
+                                        key={a.id}
+                                        className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-2xl"
+                                        style={{ backgroundColor: 'var(--bg-elevated)', border: '1px solid var(--border)' }}
+                                    >
+                                        {/* Info */}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                                                <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                                                    {a.junior_name}
+                                                </p>
+                                                <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400">
+                                                    {methodLabel[a.routing_method] || a.routing_method}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                                                {a.title} → {a.recipient_name}
+                                            </p>
+                                            <p className="text-[10px] font-mono mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                                                {a.recipient_account.replace(/(.{4})/g, '$1 ').trim()}
+                                            </p>
+                                        </div>
+
+                                        {/* Amount + buttons */}
+                                        <div className="flex items-center gap-3 shrink-0">
+                                            <p className="text-sm font-black text-amber-400">
+                                                £{parseFloat(a.amount).toFixed(2)}
+                                            </p>
+                                            <button
+                                                onClick={() => handleDecide(a.id, 'approve')}
+                                                disabled={decidingId === a.id}
+                                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors disabled:opacity-50"
+                                            >
+                                                <CheckCircle2 size={14} />
+                                                Approve
+                                            </button>
+                                            <button
+                                                onClick={() => handleDecide(a.id, 'reject')}
+                                                disabled={decidingId === a.id}
+                                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50"
+                                            >
+                                                <XCircle size={14} />
+                                                Reject
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    )}
 
                     {/* Saved recipients */}
                     <section className="rounded-3xl p-5 sm:p-6" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
