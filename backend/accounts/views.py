@@ -15,6 +15,7 @@ import re
 from limits.models import AccountLimits
 from cards.serializers import CardSerializer
 from transactions.models import Transaction
+from notifications.utils import notify
 
 class MyAccountsListView(generics.ListAPIView):
     serializer_class = AccountSerializer
@@ -74,6 +75,9 @@ class CreateJuniorAccountView(APIView):
             parent_customer=parent_customer,
             kyc_verified=True
         )
+
+        notify(request.user, 'Junior account created',
+               f'Junior account for {first_name.title()} {last_name.title()} has been created successfully.')
 
         return Response({"message": "Junior account created", "customer_id": junior_customer.id}, status=status.HTTP_201_CREATED)
 

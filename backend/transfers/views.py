@@ -10,6 +10,7 @@ from .models import Transfer, SavedRecipient
 from transactions.models import Transaction
 from django.db.models import Q
 from decimal import Decimal
+from notifications.utils import notify
 
 
 class TransferPagination(PageNumberPagination):
@@ -157,6 +158,11 @@ class OwnTransferView(APIView):
                     balance_after=target_acc.balance
                 )
 
+                notify(request.user, 'Transfer sent',
+                       f'You sent £{amount} to {target_acc.account_type} account.')
+                notify(request.user, 'Transfer received',
+                       f'£{amount} arrived in your {target_acc.account_type} account.')
+
             return Response({"status": "success"}, status=200)
 
         except Exception as e:
@@ -216,6 +222,16 @@ class NationalTransferView(APIView):
                     amount=amount, title=transfer.title,
                     balance_after=target_acc.balance
                 )
+
+                notify(request.user, 'Transfer sent',
+                       f'You sent £{amount} to {transfer.recipient_name}.')
+
+                try:
+                    if recipient_user:
+                        notify(recipient_user, 'Money received',
+                               f'You received £{amount} from a Lyo transfer.')
+                except Exception:
+                    pass
 
             return Response({"status": "success"}, status=200)
 
