@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate, NavLink, Link } from 'react-router-dom';
-import { LogOut, Star, Bell, LayoutDashboard, Send, Clock, UserCircle } from 'lucide-react';
+import { LogOut, Star, LayoutDashboard, Send, Clock, UserCircle } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 import api from '../api/axios';
 
 const JuniorLayout = () => {
@@ -55,10 +56,7 @@ const JuniorLayout = () => {
                 </Link>
 
                 <div className="flex items-center gap-4">
-                    <div className="relative cursor-pointer">
-                        <Bell size={22} className="text-purple-400 hover:text-purple-600 transition-colors" />
-                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-pink-500 border-2 border-white rounded-full"></span>
-                    </div>
+                    <NotificationBell juniorTheme />
 
                     <Link
                         to="/junior/profile"
