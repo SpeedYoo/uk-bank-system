@@ -39,5 +39,6 @@ urlpatterns = [
     path('api/', include('cards.urls')),
     path('api/', include('transfers.urls')),
     path('api/', include('transactions.urls')),
+    path('api/', include('notifications.urls')),
 ]
 

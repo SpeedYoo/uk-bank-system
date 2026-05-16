@@ -9,6 +9,7 @@ from .models import Card
 from decimal import Decimal
 from django.db import transaction
 from transactions.models import Transaction
+from notifications.utils import notify
 
 class CreateCardView(APIView):
     permission_classes = [IsAuthenticated]
@@ -126,6 +127,9 @@ class TopUpPrepaidView(APIView):
                 title=f"Top-up Prepaid Card {card.masked_number}",
                 balance_after=account.balance
             )
+
+            notify(request.user, 'Card topped up',
+                   f'Your prepaid card {card.masked_number} has been topped up with £{amount}.')
 
         return Response({
             "message": "Card topped up successfully", 
