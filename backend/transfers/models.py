@@ -40,3 +40,36 @@ class SavedRecipient(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.account})"
+
+
+class JuniorApproval(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING',  'Pending'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+    ]
+
+    junior_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='junior_approvals'
+    )
+    parent_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='parent_approvals'
+    )
+    from_account = models.ForeignKey(Account, on_delete=models.CASCADE)
+
+    recipient_name    = models.CharField(max_length=255)
+    recipient_account = models.CharField(max_length=34)
+    swift_bic         = models.CharField(max_length=11, null=True, blank=True)
+    amount            = models.DecimalField(max_digits=12, decimal_places=2)
+    title             = models.CharField(max_length=255)
+    routing_method    = models.CharField(max_length=10)
+
+    status     = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    created_at = models.DateTimeField(auto_now_add=True)
+    decided_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Approval #{self.id} — {self.junior_user} → £{self.amount} to {self.recipient_name}"

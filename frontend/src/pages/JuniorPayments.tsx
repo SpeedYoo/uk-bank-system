@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Send, Trash2, UserPlus, ChevronRight, Globe, Zap, Clock } from 'lucide-react';
+import { Send, Trash2, UserPlus, ChevronRight, Globe, Zap, Clock, Hourglass } from 'lucide-react';
 import api from '../api/axios';
 import TransferModal from '../components/TransferModal';
 
@@ -22,6 +22,16 @@ interface Recipient {
     routing_method: string;
 }
 
+interface PendingApproval {
+    id: number;
+    recipient_name: string;
+    recipient_account: string;
+    amount: string;
+    title: string;
+    routing_method: string;
+    created_at: string;
+}
+
 const methodLabel: Record<string, string> = {
     FPS: 'Faster Payments',
     BACS: 'BACS',
@@ -40,6 +50,7 @@ const JuniorPayments: React.FC = () => {
     const [accounts, setAccounts] = useState<any[]>([]);
     const [transfers, setTransfers] = useState<Transfer[]>([]);
     const [recipients, setRecipients] = useState<Recipient[]>([]);
+    const [pendingApprovals, setPendingApprovals] = useState<PendingApproval[]>([]);
     const [loading, setLoading] = useState(true);
     const [hasMore, setHasMore] = useState(false);
     const [page, setPage] = useState(1);
@@ -56,13 +67,15 @@ const JuniorPayments: React.FC = () => {
 
     const fetchAll = useCallback(async (resetPage = true) => {
         try {
-            const [accRes, recRes, txRes] = await Promise.all([
+            const [accRes, recRes, txRes, aprRes] = await Promise.all([
                 api.get('/accounts/'),
                 api.get('/recipients/'),
                 api.get('/transfers/', { params: { page: resetPage ? 1 : page } }),
+                api.get('/junior/my-approvals/').catch(() => ({ data: [] })),
             ]);
             setAccounts(accRes.data);
             setRecipients(recRes.data);
+            setPendingApprovals(aprRes.data);
             if (resetPage) {
                 setTransfers(txRes.data.results ?? []);
                 setPage(1);
@@ -146,6 +159,35 @@ const JuniorPayments: React.FC = () => {
                         <Send size={15} /> Send money
                     </button>
                 </div>
+
+                {/* ── Pending approvals ── */}
+                {pendingApprovals.length > 0 && (
+                    <div className="bg-amber-50 border-2 border-amber-200 rounded-[1.5rem] p-5 shadow-sm">
+                        <div className="flex items-center gap-2 mb-3">
+                            <Hourglass size={15} className="text-amber-500 shrink-0" />
+                            <h2 className="text-[10px] font-black uppercase tracking-widest text-amber-500">
+                                Waiting for parent approval ({pendingApprovals.length})
+                            </h2>
+                        </div>
+                        <div className="space-y-2">
+                            {pendingApprovals.map(a => (
+                                <div key={a.id} className="flex items-center gap-3 p-3 rounded-2xl bg-white border border-amber-100">
+                                    <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-amber-100 text-amber-500 shrink-0">
+                                        <Clock size={14} />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-semibold text-gray-800 truncate">{a.recipient_name}</p>
+                                        <p className="text-xs text-gray-400">{a.title}</p>
+                                    </div>
+                                    <div className="text-right shrink-0">
+                                        <p className="text-sm font-black text-amber-500">£{parseFloat(a.amount).toFixed(2)}</p>
+                                        <p className="text-[10px] text-amber-400 font-bold uppercase">Pending</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {/* Saved recipients */}
                 <div className="bg-white rounded-[1.5rem] border-2 border-purple-100 p-5 shadow-sm">

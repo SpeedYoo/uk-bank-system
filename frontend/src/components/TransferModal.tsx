@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Send, CheckCircle2, Globe, Zap } from 'lucide-react';
+import { X, Send, CheckCircle2, Globe, Zap, Clock } from 'lucide-react';
 import api from '../api/axios';
 
 interface TransferModalProps {
@@ -77,6 +77,7 @@ const TransferModal: React.FC<TransferModalProps> = ({
     const [activeTab, setActiveTab] = useState<'EXTERNAL' | 'OWN'>('EXTERNAL');
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [pendingApproval, setPendingApproval] = useState(false);
     const [error, setError] = useState('');
 
     const [fromAccountId, setFromAccountId] = useState('');
@@ -109,6 +110,7 @@ const TransferModal: React.FC<TransferModalProps> = ({
     useEffect(() => {
         if (isOpen) {
             setSuccess(false);
+            setPendingApproval(false);
             setError('');
             setAmount('');
             setSwiftCode('');
@@ -178,9 +180,14 @@ const TransferModal: React.FC<TransferModalProps> = ({
                     amount: parsedAmount,
                     title,
                 };
-            await api.post(endpoint, payload);
-            setSuccess(true);
-            setTimeout(() => { onSuccess(); onClose(); }, 2000);
+            const res = await api.post(endpoint, payload);
+            if (res.data?.status === 'pending_approval') {
+                setPendingApproval(true);
+                setTimeout(() => { onSuccess(); onClose(); }, 3000);
+            } else {
+                setSuccess(true);
+                setTimeout(() => { onSuccess(); onClose(); }, 2000);
+            }
         } catch (err: any) {
             setError(err.response?.data?.error || 'Transfer failed. Please check your details and try again.');
         } finally {
@@ -231,8 +238,18 @@ const TransferModal: React.FC<TransferModalProps> = ({
                     </div>
                 )}
 
-                {/* Success */}
-                {success ? (
+                {/* Pending approval screen */}
+                {pendingApproval ? (
+                    <div className="p-12 flex flex-col items-center justify-center text-center space-y-4 flex-1">
+                        <div className="w-20 h-20 rounded-full flex items-center justify-center border bg-amber-50 border-amber-200">
+                            <Clock size={40} className="text-amber-500" />
+                        </div>
+                        <h3 className={`text-2xl font-bold ${t.successTitle}`}>Awaiting Approval</h3>
+                        <p className={`font-medium ${t.successSub}`}>
+                            Your transfer has been sent to your parent for approval.
+                        </p>
+                    </div>
+                ) : success ? (
                     <div className="p-12 flex flex-col items-center justify-center text-center space-y-4 flex-1">
                         <div className={`w-20 h-20 rounded-full flex items-center justify-center border ${t.successIcon}`}>
                             <CheckCircle2 size={40} className={t.successCheck} />
