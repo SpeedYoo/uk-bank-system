@@ -11,6 +11,7 @@ import History from './pages/History';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
 import Payments from './pages/Payments';
+import Analytics from './pages/Analytics';
 import JuniorDashboard from './pages/JuniorDashboard';
 import PublicRoute from './components/PublicRoute';
 import Layout from './components/Layout';
@@ -64,6 +65,7 @@ function App() {
             <Route path="/settings" element={<Settings />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/payments" element={<Payments />} />
+            <Route path="/analytics" element={<Analytics />} />
           </Route>
         </Route>
         
