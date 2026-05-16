@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { TrendingUp, TrendingDown, Search, X } from 'lucide-react';
 import api from '../api/axios';
 import TransactionDetailModal from './TransactionDetailModal';
 
@@ -25,12 +25,15 @@ const TransactionHistory: React.FC<Props> = ({ accounts }) => {
     const [typeFilter, setTypeFilter] = useState<'ALL' | 'CREDIT' | 'DEBIT'>('ALL');
     const [fromDate, setFromDate] = useState('');
     const [toDate, setToDate] = useState('');
+    const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(false);
     const [total, setTotal] = useState(0);
     const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
         if (accounts.length > 0 && !selectedAccountId) {
@@ -38,17 +41,28 @@ const TransactionHistory: React.FC<Props> = ({ accounts }) => {
         }
     }, [accounts]);
 
+    /* Debounce search input — 300 ms */
+    useEffect(() => {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => setDebouncedSearch(search), 300);
+        return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+    }, [search]);
+
+    const buildParams = useCallback((pg: number): Record<string, string> => {
+        const params: Record<string, string> = { page: String(pg) };
+        if (typeFilter !== 'ALL') params.type = typeFilter;
+        if (fromDate) params.from = fromDate;
+        if (toDate) params.to = toDate;
+        if (debouncedSearch) params.search = debouncedSearch;
+        return params;
+    }, [typeFilter, fromDate, toDate, debouncedSearch]);
+
     const fetchTransactions = useCallback(async (resetPage = true) => {
         if (!selectedAccountId) return;
         setLoading(true);
-        const currentPage = resetPage ? 1 : page;
+        const pg = resetPage ? 1 : page;
         try {
-            const params: Record<string, string> = { page: String(currentPage) };
-            if (typeFilter !== 'ALL') params.type = typeFilter;
-            if (fromDate) params.from = fromDate;
-            if (toDate) params.to = toDate;
-
-            const res = await api.get(`/accounts/${selectedAccountId}/transactions/`, { params });
+            const res = await api.get(`/accounts/${selectedAccountId}/transactions/`, { params: buildParams(pg) });
             if (resetPage) {
                 setTransactions(res.data.results);
                 setPage(1);
@@ -62,22 +76,18 @@ const TransactionHistory: React.FC<Props> = ({ accounts }) => {
         } finally {
             setLoading(false);
         }
-    }, [selectedAccountId, typeFilter, fromDate, toDate, page]);
+    }, [selectedAccountId, buildParams, page]);
 
     useEffect(() => {
         fetchTransactions(true);
-    }, [selectedAccountId, typeFilter, fromDate, toDate]);
+    }, [selectedAccountId, typeFilter, fromDate, toDate, debouncedSearch]);
 
     const loadMore = async () => {
         const nextPage = page + 1;
         setPage(nextPage);
         setLoading(true);
         try {
-            const params: Record<string, string> = { page: String(nextPage) };
-            if (typeFilter !== 'ALL') params.type = typeFilter;
-            if (fromDate) params.from = fromDate;
-            if (toDate) params.to = toDate;
-            const res = await api.get(`/accounts/${selectedAccountId}/transactions/`, { params });
+            const res = await api.get(`/accounts/${selectedAccountId}/transactions/`, { params: buildParams(nextPage) });
             setTransactions(prev => [...prev, ...res.data.results]);
             setHasMore(!!res.data.next);
         } catch (err) {
@@ -100,6 +110,8 @@ const TransactionHistory: React.FC<Props> = ({ accounts }) => {
             <div className="rounded-3xl p-5 sm:p-6" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
                 {/* Filters */}
                 <div className="flex flex-wrap gap-3 mb-5">
+
+                    {/* Account selector */}
                     {accounts.length > 1 && (
                         <select
                             value={selectedAccountId}
@@ -115,6 +127,7 @@ const TransactionHistory: React.FC<Props> = ({ accounts }) => {
                         </select>
                     )}
 
+                    {/* Type pills */}
                     <div className="flex p-1 rounded-xl" style={{ backgroundColor: 'var(--bg-base)' }}>
                         {(['ALL', 'CREDIT', 'DEBIT'] as const).map(t => (
                             <button
@@ -130,6 +143,7 @@ const TransactionHistory: React.FC<Props> = ({ accounts }) => {
                         ))}
                     </div>
 
+                    {/* Date range */}
                     <div className="flex gap-2 items-center flex-wrap">
                         <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)}
                             className="px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00FF85]/50"
@@ -140,8 +154,31 @@ const TransactionHistory: React.FC<Props> = ({ accounts }) => {
                             style={{ backgroundColor: 'var(--bg-base)', border: '1px solid var(--border)', color: 'var(--text-primary)' }} />
                         {(fromDate || toDate) && (
                             <button onClick={() => { setFromDate(''); setToDate(''); }}
-                                className="text-xs px-2 py-1 rounded-lg" style={{ color: 'var(--text-muted)', backgroundColor: 'var(--bg-base)' }}>
+                                className="text-xs px-2 py-1 rounded-lg"
+                                style={{ color: 'var(--text-muted)', backgroundColor: 'var(--bg-base)' }}>
                                 Clear
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Search */}
+                    <div className="relative flex-1 min-w-48">
+                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
+                        <input
+                            type="text"
+                            placeholder="Search by title or recipient…"
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                            className="w-full pl-8 pr-8 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00FF85]/50"
+                            style={{ backgroundColor: 'var(--bg-base)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+                        />
+                        {search && (
+                            <button
+                                onClick={() => setSearch('')}
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2"
+                                style={{ color: 'var(--text-muted)' }}
+                            >
+                                <X size={14} />
                             </button>
                         )}
                     </div>
@@ -149,7 +186,10 @@ const TransactionHistory: React.FC<Props> = ({ accounts }) => {
 
                 {/* Count */}
                 {total > 0 && (
-                    <p className="text-xs mb-4" style={{ color: 'var(--text-muted)' }}>{total} transaction{total !== 1 ? 's' : ''}</p>
+                    <p className="text-xs mb-4" style={{ color: 'var(--text-muted)' }}>
+                        {total} transaction{total !== 1 ? 's' : ''}
+                        {debouncedSearch && <span> matching <strong>"{debouncedSearch}"</strong></span>}
+                    </p>
                 )}
 
                 {/* List */}
@@ -159,7 +199,9 @@ const TransactionHistory: React.FC<Props> = ({ accounts }) => {
                     </div>
                 ) : transactions.length === 0 ? (
                     <div className="text-center py-12">
-                        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No transactions found.</p>
+                        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                            {debouncedSearch ? `No transactions matching "${debouncedSearch}".` : 'No transactions found.'}
+                        </p>
                     </div>
                 ) : (
                     <div className="space-y-2">

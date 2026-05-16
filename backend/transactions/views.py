@@ -39,6 +39,12 @@ class AccountTransactionListView(APIView):
         elif tx_type == 'DEBIT':
             qs = qs.filter(amount__lt=0)
 
+        search = request.query_params.get('search', '').strip()
+        if search:
+            qs = qs.filter(
+                Q(title__icontains=search) | Q(recipient_name__icontains=search)
+            )
+
         paginator = TransactionPagination()
         page = paginator.paginate_queryset(qs, request)
         serializer = TransactionSerializer(page, many=True)
