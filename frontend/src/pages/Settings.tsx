@@ -93,7 +93,7 @@ const Settings = () => {
                                 className={`
                                     absolute top-0.5 w-6 h-6 rounded-full bg-white shadow-md
                                     transition-transform duration-300
-                                    ${isDark ? 'translate-x-0.5' : 'translate-x-7'}
+                                    ${isDark ? 'translate-x-0.5' : '-translate-x-7'}
                                 `}
                             />
                         </button>
