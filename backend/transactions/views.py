@@ -42,7 +42,7 @@ class AccountTransactionListView(APIView):
         search = request.query_params.get('search', '').strip()
         if search:
             qs = qs.filter(
-                Q(title__icontains=search) | Q(recipient_name__icontains=search)
+                Q(title__icontains=search) | Q(transfer__recipient_name__icontains=search)
             )
 
         paginator = TransactionPagination()
